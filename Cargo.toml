@@ -1,0 +1,31 @@
+[package]
+name = "class-scaffolding"
+version = "0.1.0"
+authors = ["dsietz <davidsietz@yahoo.com>"]
+edition = "2021"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = ["sdk", "design", "development", "object-oriented", "class"]
+categories = ["development-tools"]
+description = "A software development kit that provides the scaffolding for building classes."
+documentation = "https://docs.rs/class-scaffolding"
+repository = "https://github.com/dsietz/class-scaffolding"
+exclude = [
+    "examples/*",
+    "target/*",
+	"tests/*",
+	"benches/*",
+]
+
+[badges]
+maintenance = {status = "actively-developed"}
+
+[dependencies]
+env_logger = "~0.10"
+log = "~0.4"
+
+[dependencies.uuid]
+version = "1.3.3"
+features = [
+    "v4", 
+]
