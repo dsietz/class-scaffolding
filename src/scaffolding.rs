@@ -7,18 +7,33 @@
 extern crate uuid;
 
 use uuid::Uuid;
+use proc_macro::TokenStream;
 
-pub struct AbstractEntity {
-    pub uid: String,
-}
+// https://users.rust-lang.org/t/struct-inheritance-embedding-best-practice/10627/5 
+// https://doc.rust-lang.org/reference/attributes/derive.html
+// https://stackoverflow.com/questions/53135923/how-to-write-a-custom-derive-macro
+// https://docs.rs/syn/latest/syn/index.html#example-of-a-custom-derive
 
-impl AbstractEntity {
-    pub fn new() -> Self {
+trait EntityBehavior {
+    fn new() -> AbstractEntity {
         AbstractEntity {
             uid: Uuid::new_v4().to_string(),
         }
     }
 }
+
+#[proc_macro_derive(EntityBehavior)]
+pub struct AbstractEntity {
+    pub uid: String,
+}
+
+// impl AbstractEntity {
+//     pub fn new() -> Self {
+//         AbstractEntity {
+//             uid: Uuid::new_v4().to_string(),
+//         }
+//     }
+// }
 
 #[cfg(test)]
 mod tests {
