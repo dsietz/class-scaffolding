@@ -1,0 +1,39 @@
+[package]
+name = "scaffolding-core"
+version = "0.1.0"
+authors = ["dsietz <davidsietz@yahoo.com>"]
+edition = "2021"
+readme = "README.md"
+license = "Apache-2.0"
+keywords = ["sdk", "design", "development", "object-oriented", "class"]
+categories = ["development-tools"]
+description = "A software development kit that provides the scaffolding for building applications and services."
+documentation = "https://docs.rs/scaffolding-core"
+repository = "https://github.com/dsietz/scaffolding-core"
+exclude = [
+    "examples/*",
+    "target/*",
+	"tests/*",
+	"benches/*",
+]
+
+[badges]
+maintenance = {status = "actively-developed"}
+
+[lib]
+name = "class_scaffolding"
+path = "src/lib.rs"
+proc-macro = true
+
+[dependencies]
+derive = "1.0.0"
+env_logger = "~0.10"
+log = "~0.4"
+quote = "1.0.28"
+syn = "2.0.18"
+
+[dependencies.uuid]
+version = "1.3.3"
+features = [
+    "v4", 
+]
