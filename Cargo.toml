@@ -1,5 +1,5 @@
 [package]
-name = "class-scaffolding"
+name = "scaffolding-core"
 version = "0.1.0"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 edition = "2021"
@@ -7,9 +7,9 @@ readme = "README.md"
 license = "Apache-2.0"
 keywords = ["sdk", "design", "development", "object-oriented", "class"]
 categories = ["development-tools"]
-description = "A software development kit that provides the scaffolding for building classes."
-documentation = "https://docs.rs/class-scaffolding"
-repository = "https://github.com/dsietz/class-scaffolding"
+description = "A software development kit that provides the scaffolding for building applications and services."
+documentation = "https://docs.rs/scaffolding-core"
+repository = "https://github.com/dsietz/scaffolding-core"
 exclude = [
     "examples/*",
     "target/*",
