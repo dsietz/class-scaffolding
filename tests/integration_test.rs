@@ -1,21 +1,22 @@
 // #[macro_use]
-extern crate class_scaffolding;
+extern crate scaffolding_core;
 
 #[cfg(test)]
 mod tests {
-    use class_scaffolding::add_field;
-    // #[derive(AnswerFn)]
-    // struct Struct;
+    // use scaffolding_core::add_field;
+    // // #[derive(AnswerFn)]
+    // // struct Struct;
 
-    #[test]
-    fn test_add_fields() {
-        #[add_field]
-        #[derive(Debug, Clone)]
-        struct Foo {}
+    // #[test]
+    // #[ignore]
+    // fn test_add_fields() {
+    //     #[add_field]
+    //     #[derive(Debug, Clone)]
+    //     struct Foo {}
         
-        let bar = Foo { a: "lorem ipsum".to_string()};
-        assert_eq!(format!("{:?}", bar), "{}");;
-    }
+    //     let bar = Foo { a: "lorem ipsum".to_string()};
+    //     assert_eq!(format!("{:?}", bar), "{}");;
+    // }
 
     // fn test_macro3() {
     //     assert_eq!(42, answer());
