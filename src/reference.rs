@@ -154,7 +154,16 @@ impl fmt::Display for ReferenceObjectValue {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
             ReferenceObjectValue::REFERENCE(r) => {
-                write!(f, "{}", r.param)
+                let rv = match r.param.clone() {
+                    ReferenceValueDataType::NUMBER(n) => {
+                        n.to_string()
+                    },
+                    ReferenceValueDataType::TEXT(s) => {
+                        s
+                    },
+                };
+
+                write!(f, "{}", rv)
             }
             ReferenceObjectValue::NUMBER(n) => {
                 write!(f, "{}", n.to_string())
@@ -208,13 +217,46 @@ pub struct ReferenceObject {
 
 impl ReferenceObject {
     pub fn new(
-        key: String,
+        key: Option<String>,
         value: Option<ReferenceObjectValue>,
         source_identifier: String,
     ) -> Self {
+        let k = match key {
+            Some(s) => {
+                s
+            },
+            None => {
+                Uuid::new_v4().to_string()
+            }
+        };
+
+        // Handle generating Uuid for ReferenceObjectValue::UUID(None) 
+        let v = match value {
+            Some(val) => {
+                match val {
+                    ReferenceObjectValue::UUID(u) => {
+                        match u {
+                            Some(id) => {
+                                Some(ReferenceObjectValue::UUID(Some(id)))
+                            },
+                            None => {
+                                Some(ReferenceObjectValue::UUID(Some(Uuid::new_v4().to_string())))
+                            }
+                        }
+                    },
+                    _ => {
+                        Some(val)
+                    }
+                }
+            },
+            None => {
+                value
+            }
+        };
+
         Self {
-            key: key,
-            value: value,
+            key: k,
+            value: v,
             source_identifier: source_identifier,
         }
     }
@@ -228,7 +270,7 @@ impl ReferenceObject {
     }
 
     pub fn value(&self) -> Either<String, usize> {
-        match self.value {
+        match self.value.clone() {
             Some(v) => {
                 match v {
                     ReferenceObjectValue::REFERENCE(r) => {
@@ -270,6 +312,59 @@ impl ReferenceObject {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_refobj_new_number() {
+        let refsrc_id = "4cf2add2-11f3-450b-9f2f-fe4035c82161".to_string();
+        let refval = 1234567980;
+        let refobj = ReferenceObject::new(
+            None,
+            Some(ReferenceObjectValue::NUMBER(refval)),
+            refsrc_id.clone()
+        );
+        let val = refobj.value();
+
+        assert_eq!(refobj.key.len(), 36);
+        assert_eq!(refobj.source_identifier, refsrc_id);
+        assert_eq!(val.is_left(), false);
+        assert_eq!(val.is_right(), true);
+        assert_eq!(refobj.value().right().unwrap(), refval);
+    }
+
+    #[test]
+    fn test_refobj_new_text() {
+        let refsrc_id = "4cf2add2-11f3-450b-9f2f-fe4035c82161".to_string();
+        let refval = "C1234567890".to_string();
+        let refobj = ReferenceObject::new(
+            None,
+            Some(ReferenceObjectValue::TEXT(refval.clone())),
+            refsrc_id.clone()
+        );
+        let val = refobj.value();
+
+        assert_eq!(refobj.key.len(), 36);
+        assert_eq!(refobj.source_identifier, refsrc_id);
+        assert_eq!(val.is_left(), true);
+        assert_eq!(val.is_right(), false);
+        assert_eq!(refobj.value().left().unwrap(), refval);
+    }
+
+    #[test]
+    fn test_refobj_new_text_empty() {
+        let refsrc_id = "4cf2add2-11f3-450b-9f2f-fe4035c82161".to_string();
+        let refobj = ReferenceObject::new(
+            None,
+            Some(ReferenceObjectValue::UUID(None)),
+            refsrc_id.clone()
+        );
+        let val = refobj.value();
+
+        assert_eq!(refobj.key.len(), 36);
+        assert_eq!(refobj.source_identifier, refsrc_id);
+        assert_eq!(val.is_left(), true);
+        assert_eq!(val.is_right(), false);
+        assert_eq!(refobj.value().left().unwrap().len(), 36);
+    }
 
     #[test]
     fn test_refsrc_new_api_with_id() {
