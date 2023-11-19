@@ -13,7 +13,7 @@ mod tests {
     //     #[add_field]
     //     #[derive(Debug, Clone)]
     //     struct Foo {}
-        
+
     //     let bar = Foo { a: "lorem ipsum".to_string()};
     //     assert_eq!(format!("{:?}", bar), "{}");;
     // }
