@@ -1,4 +1,5 @@
 #[macro_use]
+use openapiv3::OpenAPI;
 use uuid::Uuid;
 
 const DATA: &'static str = "data";
@@ -27,13 +28,13 @@ impl DatabaseSourceDefinition {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct OpenAPISourceDefinition {
-    document: String,
+    document: OpenAPI,
 }
 
 impl OpenAPISourceDefinition {
-    pub fn new(document: String) -> Self {
+    pub fn new(document: OpenAPI) -> Self {
         Self { document: document }
     }
 
@@ -96,12 +97,6 @@ impl ReferenceSource {
 #[cfg(test)]
 mod tests {
     use super::*;
-    // use serde_json::*;
-    use std::fs;
-
-    fn read_openapi_json () -> String {
-        fs::read_to_string("./tests/openapi-petstore.json").unwrap()
-    }
 
     #[test]
     fn test_db_srcdef_new() {
@@ -127,32 +122,21 @@ mod tests {
 
     #[test]
     fn test_openapi_srcdef_new() {
-        let api = OpenAPISourceDefinition::new(read_openapi_json());
-        assert_eq!(api.document, read_openapi_json());
+        let data = include_str!("../tests/openapi-petstore.json");
+        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let api = OpenAPISourceDefinition::new(openapi.clone());
+
+        assert_eq!(api.document, openapi);
     }
 
     #[test]
-    fn test_openapi_srcdef_deserialize() {
-        let serialized = format!("{{\"document\": \"{}\"}}", read_openapi_json());
-        println!("{}", serialized);
-        // let api = OpenAPISourceDefinition::from_serialized(&serialized);
-
-        // assert_eq!(api.document, serialized);
-    }
-
-    #[test]
-    fn test_openapi_srcdef_serialize() {
-        let mut api = OpenAPISourceDefinition::new(read_openapi_json());
+    fn test_openapi_srcdef_serialize_deserialize() {
+        let data = include_str!("../tests/openapi-petstore.json");
+        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let mut orig_api: OpenAPISourceDefinition = OpenAPISourceDefinition::new(openapi);
+        let serialized: String = orig_api.serialize();
+        let new_api: OpenAPISourceDefinition = OpenAPISourceDefinition::from_serialized(&serialized);
         
-        assert_eq!(api.serialize(), read_openapi_json());
+        assert_eq!(orig_api, new_api);
     }
-
-    // #[test]
-    // fn test_() {
-    //     let data = fs::read_to_string("./tests/openapi-petstore.json").unwrap();
-    //     let j: Value = serde_json::from_str(&data).unwrap();
-    //     let m = j.as_object().unwrap();
-
-    //     println!("{:?}", m.get("info").unwrap());
-    // }
 }
