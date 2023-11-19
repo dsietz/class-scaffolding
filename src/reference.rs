@@ -1,4 +1,3 @@
-#[macro_use]
 use std::fmt;
 use either::*;
 use openapiv3::OpenAPI;
@@ -155,12 +154,8 @@ impl fmt::Display for ReferenceObjectValue {
         match self {
             ReferenceObjectValue::REFERENCE(r) => {
                 let rv = match r.param.clone() {
-                    ReferenceValueDataType::NUMBER(n) => {
-                        n.to_string()
-                    },
-                    ReferenceValueDataType::TEXT(s) => {
-                        s
-                    },
+                    ReferenceValueDataType::NUMBER(n) => n.to_string(),
+                    ReferenceValueDataType::TEXT(s) => s,
                 };
 
                 write!(f, "{}", rv)
@@ -222,36 +217,20 @@ impl ReferenceObject {
         source_identifier: String,
     ) -> Self {
         let k = match key {
-            Some(s) => {
-                s
-            },
-            None => {
-                Uuid::new_v4().to_string()
-            }
+            Some(s) => s,
+            None => Uuid::new_v4().to_string(),
         };
 
-        // Handle generating Uuid for ReferenceObjectValue::UUID(None) 
+        // Handle generating Uuid for ReferenceObjectValue::UUID(None)
         let v = match value {
-            Some(val) => {
-                match val {
-                    ReferenceObjectValue::UUID(u) => {
-                        match u {
-                            Some(id) => {
-                                Some(ReferenceObjectValue::UUID(Some(id)))
-                            },
-                            None => {
-                                Some(ReferenceObjectValue::UUID(Some(Uuid::new_v4().to_string())))
-                            }
-                        }
-                    },
-                    _ => {
-                        Some(val)
-                    }
-                }
+            Some(val) => match val {
+                ReferenceObjectValue::UUID(u) => match u {
+                    Some(id) => Some(ReferenceObjectValue::UUID(Some(id))),
+                    None => Some(ReferenceObjectValue::UUID(Some(Uuid::new_v4().to_string()))),
+                },
+                _ => Some(val),
             },
-            None => {
-                value
-            }
+            None => value,
         };
 
         Self {
@@ -271,40 +250,19 @@ impl ReferenceObject {
 
     pub fn value(&self) -> Either<String, usize> {
         match self.value.clone() {
-            Some(v) => {
-                match v {
-                    ReferenceObjectValue::REFERENCE(r) => {
-                        match r.param {
-                            ReferenceValueDataType::TEXT(s) => {
-                                Left(s)
-                            },
-                            ReferenceValueDataType::NUMBER(n) => {
-                                Right(n)
-                            },
-                        }
-                    },
-                    ReferenceObjectValue::NUMBER(n) => {
-                        Right(n)
-                    },
-                    ReferenceObjectValue::TEXT(s) => {
-                        Left(s)
-                    },
-                    ReferenceObjectValue::UUID(u) => {
-                        match u {
-                            Some(s) => {
-                                Left(s)
-                            },
-                            None => {
-                                Left("".to_string())
-                            }
-                        }
-                        
-                    },
-                }
+            Some(v) => match v {
+                ReferenceObjectValue::REFERENCE(r) => match r.param {
+                    ReferenceValueDataType::TEXT(s) => Left(s),
+                    ReferenceValueDataType::NUMBER(n) => Right(n),
+                },
+                ReferenceObjectValue::NUMBER(n) => Right(n),
+                ReferenceObjectValue::TEXT(s) => Left(s),
+                ReferenceObjectValue::UUID(u) => match u {
+                    Some(s) => Left(s),
+                    None => Left("".to_string()),
+                },
             },
-            None => {
-                Right(0)
-            },
+            None => Right(0),
         }
     }
 }
@@ -320,7 +278,7 @@ mod tests {
         let refobj = ReferenceObject::new(
             None,
             Some(ReferenceObjectValue::NUMBER(refval)),
-            refsrc_id.clone()
+            refsrc_id.clone(),
         );
         let val = refobj.value();
 
@@ -338,7 +296,7 @@ mod tests {
         let refobj = ReferenceObject::new(
             None,
             Some(ReferenceObjectValue::TEXT(refval.clone())),
-            refsrc_id.clone()
+            refsrc_id.clone(),
         );
         let val = refobj.value();
 
@@ -355,7 +313,7 @@ mod tests {
         let refobj = ReferenceObject::new(
             None,
             Some(ReferenceObjectValue::UUID(None)),
-            refsrc_id.clone()
+            refsrc_id.clone(),
         );
         let val = refobj.value();
 
