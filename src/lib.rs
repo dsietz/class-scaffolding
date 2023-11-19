@@ -1,6 +1,9 @@
+#[macro_use]
+extern crate serde;
+
 // extern crate log;
 // extern crate derive;
-// extern crate proc_macro;
+// extern crate proc_macro
 
 // use proc_macro::TokenStream;
 // use syn::{parse_macro_input, DeriveInput, parse::Parser};
