@@ -1,5 +1,6 @@
 #[macro_use]
 use std::fmt;
+use either::*;
 use openapiv3::OpenAPI;
 use uuid::Uuid;
 
@@ -111,9 +112,8 @@ impl ReferenceSource {
 
 #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub enum ReferenceValueDataType {
-    String,
-    usize,
-    bool,
+    NUMBER(usize),
+    TEXT(String),
 }
 
 #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
@@ -225,6 +225,45 @@ impl ReferenceObject {
 
     pub fn serialize(&mut self) -> String {
         serde_json::to_string(&self).unwrap()
+    }
+
+    pub fn value(&self) -> Either<String, usize> {
+        match self.value {
+            Some(v) => {
+                match v {
+                    ReferenceObjectValue::REFERENCE(r) => {
+                        match r.param {
+                            ReferenceValueDataType::TEXT(s) => {
+                                Left(s)
+                            },
+                            ReferenceValueDataType::NUMBER(n) => {
+                                Right(n)
+                            },
+                        }
+                    },
+                    ReferenceObjectValue::NUMBER(n) => {
+                        Right(n)
+                    },
+                    ReferenceObjectValue::TEXT(s) => {
+                        Left(s)
+                    },
+                    ReferenceObjectValue::UUID(u) => {
+                        match u {
+                            Some(s) => {
+                                Left(s)
+                            },
+                            None => {
+                                Left("".to_string())
+                            }
+                        }
+                        
+                    },
+                }
+            },
+            None => {
+                Right(0)
+            },
+        }
     }
 }
 

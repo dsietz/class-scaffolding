@@ -27,6 +27,7 @@ path = "src/lib.rs"
 
 [dependencies]
 derive = "1.0.0"
+either = "1.9.0"
 env_logger = "~0.10"
 http = "1.0.0"
 log = "~0.4"
