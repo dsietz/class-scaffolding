@@ -6,14 +6,14 @@ use std::fmt;
 use uuid::Uuid;
 
 #[derive(Clone, Debug)]
-enum IdentitierValue {
+enum ReferenceValue {
     ASSIGNED(String),
     HTTP(http::Request<()>),
     NUMBER(usize),
     UUID(Option<String>),
 }
 
-impl Serialize for IdentitierValue {
+impl Serialize for ReferenceValue {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -22,20 +22,20 @@ impl Serialize for IdentitierValue {
     }
 }
 
-impl fmt::Display for IdentitierValue {
+impl fmt::Display for ReferenceValue {
     #[inline]
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            IdentitierValue::ASSIGNED(s) => {
+            ReferenceValue::ASSIGNED(s) => {
                 write!(f, "{}", s)
             }
-            IdentitierValue::HTTP(r) => {
+            ReferenceValue::HTTP(r) => {
                 write!(f, "{}", r.uri().to_string())
             }
-            IdentitierValue::NUMBER(n) => {
+            ReferenceValue::NUMBER(n) => {
                 write!(f, "{}", n.to_string())
             }
-            IdentitierValue::UUID(u) => match u {
+            ReferenceValue::UUID(u) => match u {
                 Some(i) => {
                     write!(f, "{}", i.to_string())
                 }
@@ -47,14 +47,14 @@ impl fmt::Display for IdentitierValue {
     }
 }
 
-impl IdentitierValue {
+impl ReferenceValue {
     pub fn new(v: Option<String>) -> Self {
         match v {
             Some(s) => {
-                return IdentitierValue::ASSIGNED(s);
+                return ReferenceValue::ASSIGNED(s);
             }
             None => {
-                return IdentitierValue::UUID(Some(Uuid::new_v4().to_string()));
+                return ReferenceValue::UUID(Some(Uuid::new_v4().to_string()));
             }
         }
     }
@@ -81,7 +81,7 @@ mod tests {
 
     #[derive(Debug)]
     struct Obj {
-        id: IdentitierValue,
+        id: ReferenceValue,
         is_employee: bool,
         salary: usize,
     }
@@ -93,7 +93,7 @@ mod tests {
             .uri("https://www.rust-lang.org/")
             .body(())
             .unwrap();
-        let uri: IdentitierValue = IdentitierValue::HTTP(expected.clone());
+        let uri: ReferenceValue = ReferenceValue::HTTP(expected.clone());
 
         assert_eq!(uri.as_request().unwrap().uri(), expected.uri());
     }
@@ -101,7 +101,7 @@ mod tests {
     #[test]
     fn test_identitier_attribute_as_usize() {
         let expected: usize = 1234567890;
-        let number: IdentitierValue = IdentitierValue::NUMBER(expected);
+        let number: ReferenceValue = ReferenceValue::NUMBER(expected);
 
         assert_eq!(number.as_usize().unwrap(), expected);
     }
@@ -116,20 +116,20 @@ mod tests {
             .unwrap();
         let expected = r#"https://www.rust-lang.org/"#;
 
-        assert_eq!(IdentitierValue::HTTP(request).to_string(), expected);
+        assert_eq!(ReferenceValue::HTTP(request).to_string(), expected);
     }
 
     #[test]
     fn test_identitier_attribute_new_some() {
         let expected: String = String::from("CUST1324657890");
-        let attr: IdentitierValue = IdentitierValue::new(Some(expected.clone()));
+        let attr: ReferenceValue = ReferenceValue::new(Some(expected.clone()));
 
         assert_eq!(attr.to_string(), expected);
     }
 
     #[test]
     fn test_identitier_attribute_new_none() {
-        let attr: IdentitierValue = IdentitierValue::new(None);
+        let attr: ReferenceValue = ReferenceValue::new(None);
         let expected: String = attr.to_string();
 
         assert_eq!(attr.to_string(), expected);
@@ -139,18 +139,18 @@ mod tests {
     fn test_identitier_attribute_number() {
         let expected = r#"1234567890"#;
 
-        assert_eq!(IdentitierValue::NUMBER(1234567890).to_string(), expected);
+        assert_eq!(ReferenceValue::NUMBER(1234567890).to_string(), expected);
     }
 
     #[test]
     fn test_identitier_attribute_scenario() {
         let record_uuid_none: Obj = Obj {
-            id: IdentitierValue::UUID(None),
+            id: ReferenceValue::UUID(None),
             is_employee: true,
             salary: 150000,
         };
         let record_uuuid_some: Obj = Obj {
-            id: IdentitierValue::UUID(Some("b98e54a0-d105-4379-a1f7-54351ddbdbd3".to_string())),
+            id: ReferenceValue::UUID(Some("b98e54a0-d105-4379-a1f7-54351ddbdbd3".to_string())),
             is_employee: true,
             salary: 150000,
         };
@@ -161,12 +161,12 @@ mod tests {
             .body(())
             .unwrap();
         let record_http: Obj = Obj {
-            id: IdentitierValue::HTTP(request),
+            id: ReferenceValue::HTTP(request),
             is_employee: true,
             salary: 150000,
         };
         let record_number: Obj = Obj {
-            id: IdentitierValue::NUMBER(1234567890),
+            id: ReferenceValue::NUMBER(1234567890),
             is_employee: true,
             salary: 150000,
         };
@@ -185,7 +185,7 @@ mod tests {
 
     #[test]
     fn test_identitier_attribute_uuid_none() {
-        let id: IdentitierValue = IdentitierValue::UUID(None);
+        let id: ReferenceValue = ReferenceValue::UUID(None);
         let expected: String = id.to_string();
 
         assert_ne!(id.to_string(), expected);
@@ -194,7 +194,7 @@ mod tests {
     #[test]
     fn test_identitier_attribute_uuid_some() {
         let expected: String = "b98e54a0-d105-4379-a1f7-54351ddbdbd3".to_string();
-        let id = IdentitierValue::UUID(Some(expected.clone()));
+        let id = ReferenceValue::UUID(Some(expected.clone()));
 
         assert_eq!(id.to_string(), expected);
     }
