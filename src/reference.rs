@@ -9,7 +9,7 @@ const HTTP: &'static str = "http";
 const HTTPS: &'static str = "https";
 const INTERNAL: &'static str = "internal";
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub struct DatabaseSourceDefinition {
     engine: String,
 }
@@ -28,7 +28,7 @@ impl DatabaseSourceDefinition {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub struct OpenAPISourceDefinition {
     document: OpenAPI,
 }
@@ -47,20 +47,32 @@ impl OpenAPISourceDefinition {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub enum SourceDefinition {
-    DatabaseSourceDefinition,
-    OpenAPISourceDefinition,
+    DB(DatabaseSourceDefinition),
+    API(OpenAPISourceDefinition),
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
+pub enum ReferenceSourceScope {
+    EXTERNAL,
+    INTERNAL
+}
+
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
+pub enum ReferenceSourceType {
+    DATA,
+    ENGINE
+}
+
+#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub struct ReferenceSource {
     // The unique identifier of the source
-    id: String,
+    identifier: String,
     // Indicates where to reference: EXTERNAL or INTERNAL
-    scope: String,
+    scope: ReferenceSourceScope,
     // The type of reference: DATA or ENGINE
-    ref_type: String,
+    ref_type: ReferenceSourceType,
     // The definition of the source: DatabaseSourceDefinition or OpenAPISourceDefinition
     definition: SourceDefinition,
 }
@@ -68,8 +80,8 @@ pub struct ReferenceSource {
 impl ReferenceSource {
     pub fn new(
         identifier: Option<String>,
-        scope: String,
-        ref_type: String,
+        scope: ReferenceSourceScope,
+        ref_type: ReferenceSourceType,
         definition: SourceDefinition,
     ) -> Self {
         let uid = match identifier {
@@ -78,7 +90,7 @@ impl ReferenceSource {
         };
 
         Self {
-            id: uid,
+            identifier: uid,
             scope: scope,
             ref_type: ref_type,
             definition: definition,
@@ -97,6 +109,61 @@ impl ReferenceSource {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn test_refsrc_new_api_with_id() {
+        let data = include_str!("../tests/openapi-petstore.json");
+        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let api = OpenAPISourceDefinition::new(openapi.clone());
+
+        let src = ReferenceSource::new(
+            Some("4cf2add2-11f3-450b-9f2f-fe4035c82161".to_string()),
+            ReferenceSourceScope::EXTERNAL,
+            ReferenceSourceType::DATA,
+            SourceDefinition::API(api.clone())
+        );
+
+        assert_eq!(src.identifier, "4cf2add2-11f3-450b-9f2f-fe4035c82161".to_string());
+        assert_eq!(src.scope, ReferenceSourceScope::EXTERNAL);
+        assert_eq!(src.ref_type, ReferenceSourceType::DATA);
+        assert_eq!(src.definition, SourceDefinition::API(api));
+    }
+
+    #[test]
+    fn test_refsrc_new_api_without_id() {
+        let data = include_str!("../tests/openapi-petstore.json");
+        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let api = OpenAPISourceDefinition::new(openapi.clone());
+
+        let src = ReferenceSource::new(
+            None,
+            ReferenceSourceScope::EXTERNAL,
+            ReferenceSourceType::DATA,
+            SourceDefinition::API(api.clone())
+        );
+
+        assert_eq!(src.identifier.len(), 36);
+        assert_eq!(src.scope, ReferenceSourceScope::EXTERNAL);
+        assert_eq!(src.ref_type, ReferenceSourceType::DATA);
+        assert_eq!(src.definition, SourceDefinition::API(api));
+    }
+
+    #[test]
+    fn test_refsrc_serialize_deserialize_api() {
+        let data = include_str!("../tests/openapi-petstore.json");
+        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let api = OpenAPISourceDefinition::new(openapi.clone());
+        let mut orig_src = ReferenceSource::new(
+            None,
+            ReferenceSourceScope::EXTERNAL,
+            ReferenceSourceType::DATA,
+            SourceDefinition::API(api.clone())
+        );
+        let serialized = orig_src.serialize();
+        let new_src = ReferenceSource::from_serialized(&serialized);
+
+        assert_eq!(orig_src, new_src);
+    }
 
     #[test]
     fn test_db_srcdef_new() {
