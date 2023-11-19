@@ -38,6 +38,6 @@ extern crate serde;
 //     }
 // }
 
-pub mod reference_attribute;
+pub mod attributes;
 // pub mod scaffolding;
 
