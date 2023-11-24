@@ -11,11 +11,7 @@ const INTERNAL: &'static str = "internal";
 #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub struct ReferenceEngine {}
 
-impl ReferenceEngine {
-    pub fn get_reference_data() -> Value {
-        json!("hello")
-    }
-}
+impl ReferenceEngine {}
 
 //Source
 // OpenAPI must be v3
@@ -31,6 +27,11 @@ impl ReferenceSource {
 
     pub fn serialize(&mut self) -> String {
         serde_json::to_string(&self).unwrap()
+    }
+
+    pub async fn get_data(&self, uri: String) -> String {
+        let resp = reqwest::get(uri).await.unwrap().text().await.unwrap();
+        resp
     }
 }
 
@@ -74,6 +75,7 @@ mod tests {
 
     #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
     struct contact {
+        id: usize,
         first_name: String,
         last_name: String,
         email: String,
@@ -118,23 +120,21 @@ mod tests {
         let server = mock_service();
         let url = server.url("/customer/27");
 
-        // perform the api call
-        let body = reqwest::get(url.to_string())
-            .await
-            .unwrap()
-            .text()
-            .await
-            .unwrap();
+        let openapi: OpenAPI = serde_json::from_str(include_str!("../tests/openapi.json"))
+            .expect("Could not deserialize input");
+        let src = ReferenceSource::API(openapi);
+        let body = src.get_data(url.to_string()).await;
+
         assert_eq!(
             body,
-            r#"{"company":"Lazz","department":"Marketing","email":"npooleyq@digg.com","first_name":"Noam","last_name":"Pooley","phone":"205-147-6793"}"#
+            r#"{"company":"Lazz","department":"Marketing","email":"npooleyq@digg.com","first_name":"Noam","id":27,"last_name":"Pooley","phone":"205-147-6793"}"#
         );
     }
 
     #[test]
     fn test_refsrc_serialization() {
-        let data = include_str!("../tests/openapi.json");
-        let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
+        let openapi: OpenAPI = serde_json::from_str(include_str!("../tests/openapi.json"))
+            .expect("Could not deserialize input");
         let mut orig_src = ReferenceSource::API(openapi);
         let new_src = ReferenceSource::from_serialized(&orig_src.serialize());
 
