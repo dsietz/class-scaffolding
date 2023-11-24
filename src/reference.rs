@@ -99,15 +99,23 @@ mod tests {
         filtered[0].clone()
     }
 
-    #[tokio::test]
-    async fn test_get_ref_data() {
-        // init the test service
+    fn mock_service() -> Server {
         let server = Server::run();
 
         server.expect(
             Expectation::matching(request::method_path("GET", "/customer/27"))
                 .respond_with(json_encoded(json!(get_contact_by_id(27)))),
         );
+
+        println!("Service listening at: {}", server.addr());
+
+        server
+    }
+
+    #[tokio::test]
+    async fn test_get_ref_data() {
+        // init the test service
+        let server = mock_service();
         let url = server.url("/customer/27");
 
         // perform the api call
