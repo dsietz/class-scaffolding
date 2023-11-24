@@ -1,4 +1,5 @@
 use openapiv3::OpenAPI;
+use serde_json::{json, Value};
 
 const DATA: &'static str = "data";
 const ENGINE: &'static str = "engine";
@@ -10,13 +11,17 @@ const INTERNAL: &'static str = "internal";
 #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub struct ReferenceEngine {}
 
-impl ReferenceEngine {}
+impl ReferenceEngine {
+    pub fn get_reference_data() -> Value {
+        json!("hello")
+    }
+}
 
 //Source
 // OpenAPI must be v3
 #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
 pub enum ReferenceSource {
-    API(OpenAPI)
+    API(OpenAPI),
 }
 
 impl ReferenceSource {
@@ -63,15 +68,69 @@ impl ReferenceValue {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use httptest::{matchers::*, responders::*, Expectation, Server};
+    use serde_json::json;
+    use serde_yaml::value::Value;
+
+    #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
+    struct contact {
+        first_name: String,
+        last_name: String,
+        email: String,
+        phone: String,
+        company: String,
+        department: String,
+    }
+
+    fn get_contact_by_id(id: usize) -> contact {
+        let raw = include_str!("../tests/contact_data.yaml");
+        let data: Value = serde_yaml::from_str(raw).unwrap();
+        let filtered: Vec<_> = data
+            .as_sequence()
+            .unwrap()
+            .iter()
+            .filter(|item| item.as_mapping().unwrap().get("id").unwrap() == id)
+            .map(|item| {
+                let c: contact = serde_yaml::from_value(item.clone()).unwrap();
+                c
+            })
+            .collect();
+
+        filtered[0].clone()
+    }
+
+    #[tokio::test]
+    async fn test_get_ref_data() {
+        // init the test service
+        let server = Server::run();
+
+        server.expect(
+            Expectation::matching(request::method_path("GET", "/customer/27"))
+                .respond_with(json_encoded(json!(get_contact_by_id(27)))),
+        );
+        let url = server.url("/customer/27");
+
+        // perform the api call
+        let body = reqwest::get(url.to_string())
+            .await
+            .unwrap()
+            .text()
+            .await
+            .unwrap();
+        assert_eq!(
+            body,
+            r#"{"company":"Lazz","department":"Marketing","email":"npooleyq@digg.com","first_name":"Noam","last_name":"Pooley","phone":"205-147-6793"}"#
+        );
+    }
 
     #[test]
     fn test_refsrc_serialization() {
         let data = include_str!("../tests/openapi.json");
         let openapi: OpenAPI = serde_json::from_str(data).expect("Could not deserialize input");
-        // let mut orig_src = ReferenceSource::API(openapi);
-        // let new_src = ReferenceSource::from_serialized(&orig_src.serialize());
+        let mut orig_src = ReferenceSource::API(openapi);
+        let new_src = ReferenceSource::from_serialized(&orig_src.serialize());
 
-        // assert_eq!(orig_src, new_src);
+        assert_eq!(orig_src, new_src);
     }
 
     #[test]
@@ -117,7 +176,6 @@ mod tests {
         assert_eq!(val.to_string(), "123456789".to_string());
     }
 
-    
     #[test]
     fn test_refval_usize_to_usize() {
         let val = ReferenceValue::NUMBER(123456789);
