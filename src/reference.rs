@@ -1,17 +1,5 @@
-use openapiv3::OpenAPI;
-use serde_json::{json, Value};
-
-const DATA: &'static str = "data";
-const ENGINE: &'static str = "engine";
-const EXTERNAL: &'static str = "external";
-const HTTP: &'static str = "http";
-const HTTPS: &'static str = "https";
-const INTERNAL: &'static str = "internal";
-
-#[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
-pub struct ReferenceEngine {}
-
-impl ReferenceEngine {}
+use openapiv3::{OpenAPI, StatusCode};
+// use serde_json::{json, Value};
 
 //Source
 // OpenAPI must be v3
@@ -29,9 +17,42 @@ impl ReferenceSource {
         serde_json::to_string(&self).unwrap()
     }
 
-    pub async fn get_data(&self, uri: String) -> String {
-        let resp = reqwest::get(uri).await.unwrap().text().await.unwrap();
-        resp
+    pub async fn get_data(&self, url:String, obj: String) -> String {
+        match self {
+            ReferenceSource::API(api) => {
+                let ddl = match &api.components {
+                    Some(c) => {
+                        let cust = match c.schemas.get(&obj) {
+                            Some(ddl) => ddl,
+                            None => {
+                                panic!("Missing specified component schema in OpenAPI!");
+                            }
+                        };
+                        println!("{:?}", cust.as_item().unwrap().schema_kind);
+                        // format!("/{:?}", cust)
+                        &cust.as_item().unwrap().schema_kind
+                    }
+                    None => {
+                        panic!("Missing components section in OpenAPI!");
+                    }
+                };
+
+                // let path = &api.paths.iter().filter(|item| 
+                    // item.1.as_item().unwrap().get.unwrap().responses.responses.get("200").unwrap().into_item().unwrap().content.get("application/json").unwrap().schema.unwrap().into_item().unwrap());
+
+                // let path = &api.paths.paths.first().unwrap().1.as_item().unwrap().get.unwrap().responses.responses.get(StatusCode::Code(200));
+
+                // println!("{:?}", path);
+
+                let resp = reqwest::get(url)
+                    .await
+                    .unwrap()
+                    .text()
+                    .await
+                    .unwrap();
+                resp
+            }
+        }
     }
 }
 
@@ -74,7 +95,7 @@ mod tests {
     use serde_yaml::value::Value;
 
     #[derive(Serialize, Clone, Deserialize, Debug, PartialEq)]
-    struct contact {
+    struct Contact {
         id: usize,
         first_name: String,
         last_name: String,
@@ -84,7 +105,7 @@ mod tests {
         department: String,
     }
 
-    fn get_contact_by_id(id: usize) -> contact {
+    fn get_contact_by_id(id: usize) -> Contact {
         let raw = include_str!("../tests/contact_data.yaml");
         let data: Value = serde_yaml::from_str(raw).unwrap();
         let filtered: Vec<_> = data
@@ -93,7 +114,7 @@ mod tests {
             .iter()
             .filter(|item| item.as_mapping().unwrap().get("id").unwrap() == id)
             .map(|item| {
-                let c: contact = serde_yaml::from_value(item.clone()).unwrap();
+                let c: Contact = serde_yaml::from_value(item.clone()).unwrap();
                 c
             })
             .collect();
@@ -123,7 +144,7 @@ mod tests {
         let openapi: OpenAPI = serde_json::from_str(include_str!("../tests/openapi.json"))
             .expect("Could not deserialize input");
         let src = ReferenceSource::API(openapi);
-        let body = src.get_data(url.to_string()).await;
+        let body = src.get_data(url.to_string(), "Customer".to_string()).await;
 
         assert_eq!(
             body,
