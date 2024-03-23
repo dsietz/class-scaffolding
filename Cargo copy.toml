@@ -24,8 +24,13 @@ maintenance = {status = "actively-developed"}
 name = "scaffolding_core"
 path = "src/lib.rs"
 
+name = "scaffolding_core_macros"
+path = "src/macros.rs"
+proc-macro = true
+
 [dependencies]
-scaffolding-macros = { path = "../scaffolding-macros"}
+quote = "1.0.35"
+syn = {version = "2.0.53", features = ["full", "extra-traits"]}
 
 [dependencies.uuid]
 version = "1.5.0"

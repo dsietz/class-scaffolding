@@ -1,22 +1,23 @@
 // #[macro_use]
 extern crate scaffolding_core;
+extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    // use scaffolding_core::add_field;
-    // // #[derive(AnswerFn)]
-    // // struct Struct;
+    use scaffolding_core::*;
+    use scaffolding_macros::*;
 
-    // #[test]
-    // #[ignore]
-    // fn test_add_fields() {
-    //     #[add_field]
-    //     #[derive(Debug, Clone)]
-    //     struct Foo {}
+    #[as_entity]
+    #[derive(Debug, Clone, Scaffolding)]
+    struct MyEntity {
+        b: bool
+    }
 
-    //     let bar = Foo { a: "lorem ipsum".to_string()};
-    //     assert_eq!(format!("{:?}", bar), "{}");;
-    // }
+    #[test]
+    fn test_entity() {
+        let entity = MyEntity {id: "lorem ipsum".to_string(), b: true};
+        entity.hello();
+    }
 
     // fn test_macro3() {
     //     assert_eq!(42, answer());
