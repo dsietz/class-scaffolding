@@ -75,10 +75,10 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl Scaffolding for #name {
-            fn hello(&self) {
-                println!("Hello, My name is {}!", stringify!(#name));
-                println!("My id is {}", self.id);
-            }
+            // fn hello(&self) {
+            //     println!("Hello, My name is {}!", stringify!(#name));
+            //     println!("My id is {}", self.id);
+            // }
         }
     };
     gen.into()

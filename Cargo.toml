@@ -15,7 +15,7 @@ license = "Apache-2.0"
 name = "scaffolding-core"
 readme = "README.md"
 repository = "https://github.com/dsietz/scaffolding-core"
-version = "0.0.1"
+version = "0.0.2"
 
 [badges]
 maintenance = {status = "experimental"}
