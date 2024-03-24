@@ -19,7 +19,7 @@ pub trait Scaffolding {
 
     /// adds x days to the timestamp
     fn add_days(dtm: i64, days: i64) -> i64 {
-        let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Duration::days(days);
+        let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Duration::try_days(days).unwrap();
         dt.timestamp()
     }
 
