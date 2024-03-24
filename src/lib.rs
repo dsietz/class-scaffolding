@@ -1,38 +1,48 @@
-// extern crate log;
-extern crate proc_macro;
+// #[macro_use]
+// use std::time::{SystemTime, UNIX_EPOCH};
+use chrono::{DateTime, Duration, Months, Utc};
+use uuid::Uuid;
 
-use proc_macro::TokenStream;
-use syn::{parse_macro_input, DeriveInput, parse::Parser};
-use quote::quote;
-
-/** reference material
- * - https://github.com/eonm-abes/proc-macro-issue-minimal-example/tree/solution)
- * - https://users.rust-lang.org/t/solved-derive-and-proc-macro-add-field-to-an-existing-struct/52307/3
-*/     
-
-#[proc_macro_attribute]
-pub fn add_field(_args: TokenStream, input: TokenStream) -> TokenStream  {
-    let mut ast = parse_macro_input!(input as DeriveInput);
-    match &mut ast.data {
-        syn::Data::Struct(ref mut struct_data) => {           
-            match &mut struct_data.fields {
-                syn::Fields::Named(fields) => {
-                    fields
-                        .named
-                        .push(syn::Field::parse_named.parse2(quote! { pub a: String }).unwrap());
-                }   
-                _ => {
-                    ()
-                }
-            }              
-            
-            return quote! {
-                #ast
-            }.into();
-        }
-        _ => panic!("`add_field` has to be used with structs "),
-    }
+pub enum Intervals {
+    Year,
+    Month,
+    Day,
 }
 
-// pub mod scaffolding;
+pub trait Scaffolding {
+    fn hello(&self) {}
 
+    /// generates a uuid v4 value
+    fn id() -> String {
+        Uuid::new_v4().to_string()
+    }
+
+    /// adds x days to the timestamp
+    fn add_days(dtm: i64, days: i64) -> i64 {
+        let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Duration::try_days(days).unwrap();
+        dt.timestamp()
+    }
+
+    /// adds x years to the timestamp
+    fn add_months(dtm: i64, months: u32) -> i64 {
+        let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Months::new(months);
+        dt.timestamp()
+    }
+
+    /// adds x years to the timestamp
+    fn add_years(dtm: i64, years: u32) -> i64 {
+        let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Months::new(years * 12);
+        dt.timestamp()
+    }
+
+    /// provided the default unix epoch time (UTC) as seconds
+    /// for the timestamp: 9999-12-31 23:59:59
+    fn never() -> i64 {
+        253402261199
+    }
+
+    /// generate the current unix epoch time (UTC) as seconds
+    fn now() -> i64 {
+        Utc::now().timestamp()
+    }
+}

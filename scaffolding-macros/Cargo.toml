@@ -1,13 +1,13 @@
 [package]
-name = "scaffolding-core"
+name = "scaffolding-macros"
 version = "0.0.1"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 edition = "2021"
 readme = "README.md"
 license = "Apache-2.0"
-keywords = ["sdk", "design", "development", "object-oriented", "class"]
+keywords = ["sdk", "macros", "development", "object-oriented", "class"]
 categories = ["development-tools"]
-description = "A software development kit that provides the scaffolding for building applications and services."
+description = "A software development kit that provides the scaffolding macros for building applications and services."
 documentation = "https://docs.rs/scaffolding-core"
 repository = "https://github.com/dsietz/scaffolding-core"
 exclude = [
@@ -21,16 +21,19 @@ exclude = [
 maintenance = {status = "actively-developed"}
 
 [lib]
-name = "scaffolding_core"
+name = "scaffolding_macros"
 path = "src/lib.rs"
+proc-macro = true
 
 [dependencies]
-chrono = "0.4.35"
-scaffolding-macros = { path = "./scaffolding-macros"}
+quote = "1.0.35"
+syn = {version = "2.0.53", features = ["full", "extra-traits"]}
 
 [dependencies.uuid]
 version = "1.5.0"
-features = ["v4"]
+features = [
+    "v4", 
+]
 
 [dev-dependencies]
 serde_yaml = "0.9.27"
