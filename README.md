@@ -1,4 +1,6 @@
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
+[![Docs.rs](https://docs.rs/scaffolding-core/badge.svg)](https://docs.rs/scaffolding-core)
+![Build/Test](https://github.com/dsietz/scaffolding-core/actions/workflows/master.yaml/badge.svg)
 
 # Scaffolding Core
 
