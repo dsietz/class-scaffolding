@@ -1,24 +1,24 @@
 [package]
-name = "scaffolding-core"
-version = "0.0.1"
 authors = ["dsietz <davidsietz@yahoo.com>"]
-edition = "2021"
-readme = "README.md"
-license = "Apache-2.0"
-keywords = ["sdk", "design", "development", "object-oriented", "class"]
 categories = ["development-tools"]
 description = "A software development kit that provides the scaffolding for building applications and services."
 documentation = "https://docs.rs/scaffolding-core"
-repository = "https://github.com/dsietz/scaffolding-core"
+edition = "2021"
 exclude = [
-    "examples/*",
-    "target/*",
-	"tests/*",
-	"benches/*",
+  "examples/*",
+  "target/*",
+  "tests/*",
+  "benches/*",
 ]
+keywords = ["sdk", "design", "development", "object-oriented", "class"]
+license = "Apache-2.0"
+name = "scaffolding-core"
+readme = "README.md"
+repository = "https://github.com/dsietz/scaffolding-core"
+version = "0.0.1"
 
 [badges]
-maintenance = {status = "actively-developed"}
+maintenance = {status = "experimental"}
 
 [lib]
 name = "scaffolding_core"
@@ -26,11 +26,11 @@ path = "src/lib.rs"
 
 [dependencies]
 chrono = "0.4.35"
-scaffolding-macros = { path = "./scaffolding-macros"}
+scaffolding-macros = {path = "./scaffolding-macros", version = "0.0.1"}
 
 [dependencies.uuid]
-version = "1.5.0"
 features = ["v4"]
+version = "1.5.0"
 
 [dev-dependencies]
 serde_yaml = "0.9.27"
