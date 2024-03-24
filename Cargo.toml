@@ -18,7 +18,7 @@ repository = "https://github.com/dsietz/scaffolding-core"
 version = "0.0.1"
 
 [badges]
-maintenance = {status = "actively-developed"}
+maintenance = {status = "experimental"}
 
 [lib]
 name = "scaffolding_core"
