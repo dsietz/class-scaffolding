@@ -4,10 +4,10 @@ extern crate scaffolding_macros;
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
-    use scaffolding_core::*;
+    use scaffolding_core::{defaults, Scaffolding};
     use scaffolding_macros::*;
 
-    #[as_entity]
+    #[scaffolding_entity]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,
@@ -17,13 +17,13 @@ mod tests {
     impl MyEntity {
         fn new(arg: bool) -> Self {
             Self {
-                id: <Self as Scaffolding>::id(),
-                created_dtm: <Self as Scaffolding>::now(),
-                modified_dtm: <Self as Scaffolding>::now(),
-                inactive_dtm: <Self as Scaffolding>::add_days(<Self as Scaffolding>::now(), 90),
-                expired_dtm: <Self as Scaffolding>::add_years(<Self as Scaffolding>::now(), 3),
+                id: defaults::id(),
+                created_dtm: defaults::now(),
+                modified_dtm: defaults::now(),
+                inactive_dtm: defaults::add_days(defaults::now(), 90),
+                expired_dtm: defaults::add_years(defaults::now(), 3),
                 b: arg,
-                n: <Self as Scaffolding>::never(),
+                n: defaults::never(),
             }
         }
 
@@ -31,13 +31,6 @@ mod tests {
             "my function".to_string()
         }
     }
-
-    // #[test]
-    // fn test_entity_hello() {
-    //     let mut entity = MyEntity::new(true);
-    //     entity.hello();
-    //     assert_eq!(entity.my_func(), "my function");
-    // }
 
     #[test]
     fn test_entity_new() {

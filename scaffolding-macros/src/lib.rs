@@ -4,7 +4,7 @@ use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::{parse, parse_macro_input, punctuated::Punctuated, ItemStruct, LitStr, Token};
 
 #[proc_macro_attribute]
-pub fn as_entity(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn scaffolding_entity(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item_struct = parse_macro_input!(input as ItemStruct);
     let _ = parse_macro_input!(args as parse::Nothing);
 
