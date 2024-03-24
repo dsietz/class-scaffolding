@@ -3,7 +3,7 @@ extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use chrono::{Utc};
+    use chrono::Utc;
     use scaffolding_core::*;
     use scaffolding_macros::*;
 
