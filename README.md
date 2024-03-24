@@ -1,13 +1,13 @@
-# Scaffolding Core
 [![License](https://img.shields.io/badge/License-Apache%202.0-blue.svg)](https://opensource.org/licenses/Apache-2.0)
 
+# Scaffolding Core
 
-### Description
 For software development teams who appreciate a kick-start to their object oriented development, this scaffolding library is a light-weight module that provides the basic structures and behavior that is the building block of all class intantiated objects. Unlike the practice of writing classes with the various approaches for building common functionality, this open source library helps you inherit these cross-class commonalities so you can focus on the differentiator that define your class.   
+
+---
 
 ### Table of Contents
 - [Scaffolding Core](#scaffolding-core)
-    - [Description](#description)
     - [Table of Contents](#table-of-contents)
   - [What's New](#whats-new)
   - [How to Contribute](#how-to-contribute)
