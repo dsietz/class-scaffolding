@@ -1,10 +1,9 @@
-// #[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use chrono::{DateTime, Utc};
+    use chrono::Utc;
     use scaffolding_core::*;
     use scaffolding_macros::*;
 
@@ -34,26 +33,17 @@ mod tests {
     }
 
     // #[test]
-    // fn test_entity() {
-    //     let entity = MyEntity {
-    //         id: "lorem ipsum".to_string(),
-    //         b: true,
-    //     };
-    //     assert_eq!(entity.id, "lorem ipsum");
+    // fn test_entity_hello() {
+    //     let mut entity = MyEntity::new(true);
+    //     entity.hello();
+    //     assert_eq!(entity.my_func(), "my function");
     // }
-
-    #[test]
-    fn test_entity_hello() {
-        let mut entity = MyEntity::new(true);
-        entity.hello();
-        assert_eq!(entity.my_func(), "my function");
-    }
 
     #[test]
     fn test_entity_new() {
         let now = Utc::now().timestamp();
         let never = 253402261199;
-        let mut entity = MyEntity::new(true);
+        let entity = MyEntity::new(true);
 
         // scaffolding attributes
         assert_eq!(
@@ -68,5 +58,8 @@ mod tests {
         // extended attributes
         assert_eq!(entity.b, true);
         assert_eq!(entity.n, never);
+
+        // extended behavior
+        assert_eq!(entity.my_func(), "my function");
     }
 }
