@@ -7,8 +7,9 @@ mod tests {
     use chrono::Utc;
     use scaffolding_core::{defaults, Scaffolding};
     use scaffolding_macros::*;
+    use std::collections::BTreeMap;
 
-    #[scaffolding_entity(bar)]
+    #[scaffolding_entity("metadata")]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,
@@ -23,6 +24,7 @@ mod tests {
                 modified_dtm: defaults::now(),
                 inactive_dtm: defaults::add_days(defaults::now(), 90),
                 expired_dtm: defaults::add_years(defaults::now(), 3),
+                metadata: BTreeMap::new(),
                 b: arg,
                 n: defaults::never(),
             }
