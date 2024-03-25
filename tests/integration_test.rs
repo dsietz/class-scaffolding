@@ -1,3 +1,4 @@
+// #[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
@@ -7,7 +8,7 @@ mod tests {
     use scaffolding_core::{defaults, Scaffolding};
     use scaffolding_macros::*;
 
-    #[scaffolding_entity]
+    #[scaffolding_entity(bar)]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,

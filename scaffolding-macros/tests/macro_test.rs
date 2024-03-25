@@ -5,7 +5,7 @@ extern crate scaffolding_macros;
 mod tests {
     use scaffolding_macros::*;
 
-    #[as_entity]
+    #[scaffolding_entity(METADATA)]
     #[derive(Debug, Clone)]
     struct MyEntity {
         b: bool,
