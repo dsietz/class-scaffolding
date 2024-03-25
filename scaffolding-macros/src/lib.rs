@@ -3,10 +3,19 @@ use quote::quote;
 use syn::parse::{Parse, ParseStream, Parser, Result};
 use syn::{parse, parse_macro_input, punctuated::Punctuated, ItemStruct, LitStr, Token};
 
+static METADATA: &str = "metadata";
+
 #[proc_macro_attribute]
-pub fn as_entity(args: TokenStream, input: TokenStream) -> TokenStream {
+pub fn scaffolding_entity(args: TokenStream, input: TokenStream) -> TokenStream {
+    // println!("attr: \"{}\"", args.to_string());
+
     let mut item_struct = parse_macro_input!(input as ItemStruct);
-    let _ = parse_macro_input!(args as parse::Nothing);
+    let attrs = parse_macro_input!(args as Args)
+        .vars
+        .iter()
+        .map(|a| a.value())
+        .collect::<Vec<_>>();
+    // println!("metadata: {:?}", attrs.contains(&"metadata".to_string()));
 
     if let syn::Fields::Named(ref mut fields) = item_struct.fields {
         // The unique identifier of the object
@@ -39,6 +48,18 @@ pub fn as_entity(args: TokenStream, input: TokenStream) -> TokenStream {
                 .parse2(quote! { expired_dtm: i64 })
                 .unwrap(),
         );
+
+        match attrs.contains(&METADATA.to_string()) {
+            true => {
+                // The metadata handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { metadata: BTreeMap<String, String> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
     }
 
     return quote! {
@@ -46,6 +67,26 @@ pub fn as_entity(args: TokenStream, input: TokenStream) -> TokenStream {
     }
     .into();
 }
+
+// #[proc_macro_attribute]
+// pub fn scaffolding_metadata(args: TokenStream, input: TokenStream) -> TokenStream {
+//     let mut item_struct = parse_macro_input!(input as ItemStruct);
+//     let _ = parse_macro_input!(args as parse::Nothing);
+
+//     if let syn::Fields::Named(ref mut fields) = item_struct.fields {
+//         // The unique identifier of the object
+//         fields.named.push(
+//             syn::Field::parse_named
+//                 .parse2(quote! { metadata: BTreeMap::new() })
+//                 .unwrap(),
+//         );
+//     }
+
+//     return quote! {
+//         #item_struct
+//     }
+//     .into();
+// }
 
 #[derive(Debug)]
 struct Args {

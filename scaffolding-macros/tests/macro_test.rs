@@ -4,8 +4,9 @@ extern crate scaffolding_macros;
 #[cfg(test)]
 mod tests {
     use scaffolding_macros::*;
+    use std::collections::BTreeMap;
 
-    #[as_entity]
+    #[scaffolding_entity("metadata")]
     #[derive(Debug, Clone)]
     struct MyEntity {
         b: bool,
@@ -19,6 +20,7 @@ mod tests {
             modified_dtm: 1711281509,
             inactive_dtm: 1711281509,
             expired_dtm: 1711281509,
+            metadata: BTreeMap::new(),
             b: true,
         };
         println!("struct is {:?}", entity);
