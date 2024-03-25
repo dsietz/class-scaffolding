@@ -71,7 +71,6 @@
 //! ```
 
 /// The core behavior of an Scaffolding object
-pub trait Scaffolding {
-}
+pub trait Scaffolding {}
 
 pub mod defaults;
