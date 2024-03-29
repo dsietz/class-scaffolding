@@ -1,4 +1,4 @@
-// #[macro_use]
+#[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
@@ -9,7 +9,7 @@ mod tests {
     use scaffolding_macros::*;
     use std::collections::BTreeMap;
 
-    #[scaffolding_entity("metadata")]
+    #[scaffolding_struct("metadata")]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,
