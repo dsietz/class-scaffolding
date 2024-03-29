@@ -30,28 +30,29 @@
 //!    This can be done by calling one of the `Scaffolding` trait's many datetime related methods, (e.g.: `never()`)  
 //!
 //! ### Example
-//!
+//! Add Scaffolding to a `struct` and `impl` using macros and defaults
 //! ```rust
 //! extern crate scaffolding_core;
 //!
-//! use scaffolding_core::{defaults, Scaffolding};
+//! use scaffolding_core::{defaults};
 //! use scaffolding_macros::*;
+//! // Required for scaffolding metadata functionality
+//! use std::collections::BTreeMap;
 //!
-//! #[scaffolding_entity]
-//! #[derive(Debug, Clone, Scaffolding)]
+//! #[scaffolding_struct("metadata")]
+//! #[derive(Debug, Clone)]
 //! struct MyEntity {
-//!     b: bool,
+//!     a: bool,
+//!     b: String,
 //! }
 //!
 //! impl MyEntity {
+//!     #[scaffolding_fn("metadata")]
 //!     fn new(arg: bool) -> Self {
+//!         let msg = format!("You said it is {}", arg);
 //!         Self {
-//!             id: defaults::id(),
-//!             created_dtm: defaults::now(),
-//!             modified_dtm: defaults::now(),
-//!             inactive_dtm: defaults::add_months(defaults::now(), 12),
-//!             expired_dtm: defaults::add_years(defaults::now(), 3),
-//!             b: arg,
+//!             a: arg,
+//!             b: msg
 //!         }
 //!     }
 //!
@@ -62,9 +63,19 @@
 //!
 //! let entity = MyEntity::new(true);
 //! println!("{:?}", entity);
+//! 
+//! // scaffolding attributes
+//! assert_eq!(entity.id.len(), 36);
+//! assert_eq!(entity.created_dtm, defaults::now());
+//! assert_eq!(entity.modified_dtm, defaults::now());
+//! // becomes inactive in 90 days
+//! assert_eq!(entity.inactive_dtm, defaults::add_days(defaults::now(), 90));
+//! // expires in 3 years
+//! assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
 //!
 //! // extended attributes
-//! assert_eq!(entity.b, true);
+//! assert_eq!(entity.a, true);
+//! assert_eq!(entity.b, "You said it is true");
 //!
 //! // extended behavior
 //! assert_eq!(entity.my_func(), "my function");

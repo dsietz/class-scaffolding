@@ -113,12 +113,17 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
 }
 
 #[proc_macro_attribute]
-pub fn scaffolding_fn(attr: TokenStream, input: TokenStream) -> TokenStream {
+pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: syn::Item = syn::parse(input).unwrap();
     let fn_item = match &mut item {
         syn::Item::Fn(fn_item) => fn_item,
         _ => panic!("expected fn"),
     };
+    let attrs = parse_macro_input!(args as Args)
+        .vars
+        .iter()
+        .map(|a| a.value())
+        .collect::<Vec<_>>();
 
     // get the name of the method
     let name = &fn_item.sig.ident.to_string();
@@ -133,8 +138,14 @@ pub fn scaffolding_fn(attr: TokenStream, input: TokenStream) -> TokenStream {
                         Struct(expr_struct) => {
                             println!("Found a Struct!");
                             let mut modify_attr_list =
-                                vec!["id", "created_dtm", "modified_dtm", "inactive_dtm"];
+                                vec!["id", "created_dtm", "modified_dtm", "inactive_dtm", "expired_dtm"];
 
+                            match attrs.contains(&METADATA.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&METADATA);
+                                }
+                                _ => {}
+                            }
                             // first determine if the attributes already exist
                             for f in 0..expr_struct.fields.len() {
                                 match &expr_struct.fields[f].member {
@@ -158,15 +169,35 @@ pub fn scaffolding_fn(attr: TokenStream, input: TokenStream) -> TokenStream {
                                 println!("Adding attribute {}", attr);
                                 match *attr {
                                     "id" => {
-                                        let line_id: FieldValue =
-                                            parse_quote! {id: "unique id".to_string()};
-                                        expr_struct.fields.insert(0, line_id);
-                                    }
+                                        let line: FieldValue =
+                                            parse_quote! {id: defaults::id()};
+                                        expr_struct.fields.insert(0, line);
+                                    },
                                     "created_dtm" => {
-                                        let line_id: FieldValue =
-                                            parse_quote! {created_dtm: Utc::now().timestamp()};
-                                        expr_struct.fields.insert(0, line_id);
-                                    }
+                                        let line: FieldValue =
+                                            parse_quote! {created_dtm: defaults::now()};
+                                        expr_struct.fields.insert(0, line);
+                                    },
+                                    "modified_dtm" => {
+                                        let line: FieldValue =
+                                            parse_quote! {modified_dtm: defaults::now()};
+                                        expr_struct.fields.insert(0, line);
+                                    },
+                                    "inactive_dtm" => {
+                                        let line: FieldValue =
+                                            parse_quote! {inactive_dtm: defaults::add_days(defaults::now(), 90)};
+                                        expr_struct.fields.insert(0, line);
+                                    },
+                                    "expired_dtm" => {
+                                        let line: FieldValue =
+                                            parse_quote! {expired_dtm: defaults::add_years(defaults::now(), 3)};
+                                        expr_struct.fields.insert(0, line);
+                                    },
+                                    "metadata" => {
+                                        let line: FieldValue =
+                                            parse_quote! {metadata: BTreeMap::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    },
                                     _ => {}
                                 }
                             }

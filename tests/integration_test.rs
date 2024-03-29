@@ -17,14 +17,9 @@ mod tests {
     }
 
     impl MyEntity {
+        #[scaffolding_fn("metadata")]
         fn new(arg: bool) -> Self {
             Self {
-                id: defaults::id(),
-                created_dtm: defaults::now(),
-                modified_dtm: defaults::now(),
-                inactive_dtm: defaults::add_days(defaults::now(), 90),
-                expired_dtm: defaults::add_years(defaults::now(), 3),
-                metadata: BTreeMap::new(),
                 b: arg,
                 n: defaults::never(),
             }
