@@ -7,9 +7,8 @@ mod tests {
     use chrono::Utc;
     use scaffolding_core::{defaults, Scaffolding};
     use scaffolding_macros::*;
-    use std::collections::BTreeMap;
 
-    #[scaffolding_struct("metadata")]
+    #[scaffolding_struct]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,
@@ -17,7 +16,7 @@ mod tests {
     }
 
     impl MyEntity {
-        #[scaffolding_fn("metadata")]
+        #[scaffolding_fn]
         fn new(arg: bool) -> Self {
             Self {
                 b: arg,

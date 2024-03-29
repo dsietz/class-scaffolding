@@ -26,7 +26,7 @@ path = "src/lib.rs"
 
 [dependencies]
 chrono = "0.4.35"
-scaffolding-macros = {path = "./scaffolding-macros", version = "0.0.3"}
+scaffolding-macros = {path = "./scaffolding-macros", version = "0.1.0"}
 
 [dependencies.uuid]
 features = ["v4"]

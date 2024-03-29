@@ -65,7 +65,7 @@
 //! println!("{:?}", entity);
 //!
 //! // scaffolding attributes
-//! assert_eq!(entity.id.len(), 36);
+//! assert_eq!(entity.id.len(), "54324f57-9e6b-4142-b68d-1d4c86572d0a".len());
 //! assert_eq!(entity.created_dtm, defaults::now());
 //! assert_eq!(entity.modified_dtm, defaults::now());
 //! // becomes inactive in 90 days
