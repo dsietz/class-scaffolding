@@ -7,7 +7,13 @@ use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
 
 static METADATA: &str = "metadata";
-static CORE_ATTRS: [&str; 4] = ["id", "created_dtm", "modified_dtm", "inactive_dtm"];
+static CORE_ATTRS: [&str; 5] = [
+    "id",
+    "created_dtm",
+    "modified_dtm",
+    "inactive_dtm",
+    "expired_dtm",
+];
 
 ///
 /// Modifying a struct
@@ -136,9 +142,14 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                 match &mut fn_item.block.stmts[s] {
                     syn::Stmt::Expr(expr, None) => match expr {
                         Struct(expr_struct) => {
-                            println!("Found a Struct!");
-                            let mut modify_attr_list =
-                                vec!["id", "created_dtm", "modified_dtm", "inactive_dtm", "expired_dtm"];
+                            // println!("Found a Struct!");
+                            let mut modify_attr_list = vec![
+                                "id",
+                                "created_dtm",
+                                "modified_dtm",
+                                "inactive_dtm",
+                                "expired_dtm",
+                            ];
 
                             match attrs.contains(&METADATA.to_string()) {
                                 true => {
@@ -153,7 +164,7 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                         match CORE_ATTRS.contains(&mbr.to_string().as_str()) {
                                             true => {
                                                 // core attribute already set, so don't need to add it
-                                                println!("Ignoring attribute {}", mbr.to_string());
+                                                // println!("Ignoring attribute {}", mbr.to_string());
                                                 modify_attr_list
                                                     .retain_mut(|a| *a != mbr.to_string().as_str());
                                             }
@@ -166,57 +177,48 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
 
                             // then, add the missing attributes
                             for attr in modify_attr_list.iter() {
-                                println!("Adding attribute {}", attr);
+                                // println!("Adding attribute {}", attr);
                                 match *attr {
                                     "id" => {
-                                        let line: FieldValue =
-                                            parse_quote! {id: defaults::id()};
+                                        let line: FieldValue = parse_quote! {id: defaults::id()};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     "created_dtm" => {
                                         let line: FieldValue =
                                             parse_quote! {created_dtm: defaults::now()};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     "modified_dtm" => {
                                         let line: FieldValue =
                                             parse_quote! {modified_dtm: defaults::now()};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     "inactive_dtm" => {
-                                        let line: FieldValue =
-                                            parse_quote! {inactive_dtm: defaults::add_days(defaults::now(), 90)};
+                                        let line: FieldValue = parse_quote! {inactive_dtm: defaults::add_days(defaults::now(), 90)};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     "expired_dtm" => {
-                                        let line: FieldValue =
-                                            parse_quote! {expired_dtm: defaults::add_years(defaults::now(), 3)};
+                                        let line: FieldValue = parse_quote! {expired_dtm: defaults::add_years(defaults::now(), 3)};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     "metadata" => {
                                         let line: FieldValue =
                                             parse_quote! {metadata: BTreeMap::new()};
                                         expr_struct.fields.insert(0, line);
-                                    },
+                                    }
                                     _ => {}
                                 }
                             }
                         }
                         _ => {
-                            println!("Not an Struct!");
+                            // println!("Not an Struct!");
                         }
                     },
                     _ => {
-                        println!("Not an Expr!");
+                        // println!("Not an Expr!");
                     }
                 }
             }
-
-            // id: "lorem ipsum".to_string(),
-            // created_dtm: 1711281509,
-            // modified_dtm: 1711281509,
-            // inactive_dtm: 1711281509,
-            // fn_item.block.stmts.insert(0,syn::parse(quote!(expired_dtm: 1711281509,).into()).unwrap());
         }
         _ => {
             print!(
@@ -226,6 +228,5 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
         }
     }
 
-    // fn_item.block.stmts.iter().filter(|stmnt| stmnt)
     item.into_token_stream().into()
 }

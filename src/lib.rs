@@ -61,9 +61,9 @@
 //!     }
 //! }
 //!
-//! let entity = MyEntity::new(true);
+//! let mut entity = MyEntity::new(true);
 //! println!("{:?}", entity);
-//! 
+//!
 //! // scaffolding attributes
 //! assert_eq!(entity.id.len(), 36);
 //! assert_eq!(entity.created_dtm, defaults::now());
@@ -72,6 +72,9 @@
 //! assert_eq!(entity.inactive_dtm, defaults::add_days(defaults::now(), 90));
 //! // expires in 3 years
 //! assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
+//! // use the metadata functionality
+//! entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
+//! assert_eq!(entity.metadata.len(), 1);
 //!
 //! // extended attributes
 //! assert_eq!(entity.a, true);
