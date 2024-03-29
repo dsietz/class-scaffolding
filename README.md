@@ -20,10 +20,10 @@ For software development teams who appreciate a kick-start to their object orien
 
 ## What's New
 
-This crate is in an `Initial` release phase and is only intended as a PoC.
+!!! This crate is in an `Initial` release phase and is only intended as a PoC. !!!
 
-**0.0.1**
-+ [Initial Release](https://github.com/dsietz/scaffolding-core/issues/1)
+**0.1.0**
++ [Added Metadata feature](https://github.com/dsietz/scaffolding-core/issues/2)
 
 ## How to Contribute
 

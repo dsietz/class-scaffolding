@@ -1,4 +1,4 @@
-// #[macro_use]
+#[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
@@ -7,9 +7,8 @@ mod tests {
     use chrono::Utc;
     use scaffolding_core::{defaults, Scaffolding};
     use scaffolding_macros::*;
-    use std::collections::BTreeMap;
 
-    #[scaffolding_entity("metadata")]
+    #[scaffolding_struct]
     #[derive(Debug, Clone, Scaffolding)]
     struct MyEntity {
         b: bool,
@@ -17,14 +16,9 @@ mod tests {
     }
 
     impl MyEntity {
+        #[scaffolding_fn]
         fn new(arg: bool) -> Self {
             Self {
-                id: defaults::id(),
-                created_dtm: defaults::now(),
-                modified_dtm: defaults::now(),
-                inactive_dtm: defaults::add_days(defaults::now(), 90),
-                expired_dtm: defaults::add_years(defaults::now(), 3),
-                metadata: BTreeMap::new(),
                 b: arg,
                 n: defaults::never(),
             }
