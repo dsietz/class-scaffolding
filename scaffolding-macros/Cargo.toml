@@ -1,6 +1,6 @@
 [package]
 name = "scaffolding-macros"
-version = "0.0.3"
+version = "0.1.0"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 edition = "2021"
 readme = "README.md"
@@ -28,12 +28,6 @@ proc-macro = true
 [dependencies]
 quote = "1.0.35"
 syn = {version = "2.0.53", features = ["full", "extra-traits"]}
-
-[dependencies.uuid]
-version = "1.5.0"
-features = [
-    "v4", 
-]
 
 [dev-dependencies]
 serde_yaml = "0.9.27"
