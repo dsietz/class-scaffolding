@@ -59,7 +59,7 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 .parse2(quote! { expired_dtm: i64 })
                 .unwrap(),
         );
-        
+
         // The list of activity performed on the object
         fields.named.push(
             syn::Field::parse_named
@@ -215,8 +215,7 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "activity" => {
-                                        let line: FieldValue =
-                                            parse_quote! {activity: Vec::new()};
+                                        let line: FieldValue = parse_quote! {activity: Vec::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "metadata" => {
