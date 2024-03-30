@@ -46,7 +46,18 @@ mod tests {
         assert_eq!((entity.inactive_dtm - entity.modified_dtm) / 86400, 90);
         assert_eq!((entity.expired_dtm - entity.modified_dtm) / 86400, 1095);
 
-        // scaffolding behavior
+        // extended attributes
+        assert_eq!(entity.b, true);
+        assert_eq!(entity.n, never);
+
+        // extended behavior
+        assert_eq!(entity.my_func(), "my function");
+    }
+
+    #[test]
+    fn test_entity_activity() {
+        let mut entity = MyEntity::new(true);
+
         entity.log_activity(
             "updated".to_string(),
             "The object has been updated".to_string(),
@@ -62,13 +73,6 @@ mod tests {
 
         assert_eq!(entity.activity.len(), 3);
         assert_eq!(entity.get_activity("updated".to_string()).len(), 2);
-
-        // extended attributes
-        assert_eq!(entity.b, true);
-        assert_eq!(entity.n, never);
-
-        // extended behavior
-        assert_eq!(entity.my_func(), "my function");
     }
 
     #[test]
@@ -151,6 +155,6 @@ mod tests {
                 ]
             }"#;
 
-        assert_eq!(entity.serialized(), expected);
+        assert_eq!(entity.serialize(), expected);
     }
 }
