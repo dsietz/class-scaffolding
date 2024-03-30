@@ -84,7 +84,6 @@
 //! assert_eq!(entity.my_func(), "my function");
 //! ```
 #[macro_use]
-
 extern crate serde_derive;
 extern crate serde_json;
 
@@ -167,7 +166,7 @@ mod tests {
     fn test_activityitem_serialization() {
         let serialized = r#"{"created_dtm":1711760135,"action":"updated","description":"The object has been updated."}"#;
         let mut ai = ActivityItem::deserialized(&serialized.as_bytes()).unwrap();
-        
+
         assert_eq!(ai.created_dtm, 1711760135);
         assert_eq!(ai.action, "updated".to_string());
         assert_eq!(ai.description, "The object has been updated.".to_string());
