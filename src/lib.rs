@@ -88,8 +88,8 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use errors::*;
-use serde::{Deserialize, Serialize};
 use serde::de::DeserializeOwned;
+use serde::{Deserialize, Serialize};
 
 /// Supporting Classes
 #[derive(Serialize, Deserialize, Debug, Clone)]
