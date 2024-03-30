@@ -23,8 +23,8 @@ For software development teams who appreciate a kick-start to their object orien
 | ----------------------------------------------------------------------------- |
 | This crate is in an `beta` release phase and is only intended as experimental.|
 
-**0.3.0**
-+ [Add Tagging](https://github.com/dsietz/scaffolding-core/issues/20)
+**0.4.0**
++ [Provide the ability to manage notes](https://github.com/dsietz/scaffolding-core/issues/29)
 
 ## How to Contribute
 
