@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 

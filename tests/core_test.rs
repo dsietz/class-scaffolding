@@ -1,4 +1,3 @@
-#[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
@@ -34,7 +33,7 @@ mod tests {
     fn test_entity_new() {
         let now = Utc::now().timestamp();
         let never = 253402261199;
-        let mut entity = MyEntity::new(true);
+        let entity = MyEntity::new(true);
 
         // scaffolding attributes
         assert_eq!(

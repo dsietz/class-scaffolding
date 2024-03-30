@@ -126,13 +126,6 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
             fn log_activity(&mut self, name: String, descr: String) {
                 self.activity.push(ActivityItem::new(name, descr));
             }
-
-            // fn serialize(&mut self) -> String
-            // where
-            //     Self: Serialize,
-            // {
-            //     serde_json::to_string(&self).unwrap()
-            // }
         }
     };
     gen.into()
