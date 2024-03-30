@@ -5,6 +5,7 @@ use syn::Expr::Struct;
 use syn::FieldValue;
 use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
+// use serde::Serialize;
 
 static METADATA: &str = "metadata";
 static CORE_ATTRS: [&str; 6] = [
@@ -125,6 +126,13 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
             fn log_activity(&mut self, name: String, descr: String) {
                 self.activity.push(ActivityItem::new(name, descr));
             }
+
+            // fn serialize(&mut self) -> String
+            // where
+            //     Self: Serialize,
+            // {
+            //     serde_json::to_string(&self).unwrap()
+            // }
         }
     };
     gen.into()

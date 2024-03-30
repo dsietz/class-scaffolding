@@ -7,10 +7,10 @@ mod tests {
     use chrono::Utc;
     use scaffolding_core::{defaults, ActivityItem, Scaffolding};
     use scaffolding_macros::*;
-    use serde_derive::Deserialize;
+    use serde_derive::{Deserialize, Serialize};
 
     #[scaffolding_struct]
-    #[derive(Debug, Clone, Scaffolding)]
+    #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]
     struct MyEntity {
         b: bool,
         n: i64,
@@ -63,11 +63,48 @@ mod tests {
         assert_eq!(entity.activity.len(), 3);
         assert_eq!(entity.get_activity("updated".to_string()).len(), 2);
 
+        let json = r#"{
+            "b":true,
+            "n":253402261199,
+            "id":"b4d6c6db-7468-400a-8536-a5e83b1f2bdc",
+            "created_dtm":1711802687,
+            "modified_dtm":1711802687,
+            "inactive_dtm":1719578687,
+            "expired_dtm":1806410687,
+            "activity":[
+                {
+                    "created_dtm":1711802687,
+                    "action":"updated",
+                    "description":"The object has been updated"
+                },
+                {
+                    "created_dtm":1711802687,
+                    "action":"updated",
+                    "description":"The object has been updated"
+                },
+                {
+                    "created_dtm":1711802687,
+                    "action":"cancelled",
+                    "description":"The object has been cancelled"
+                }
+                ]
+            }"#;
+        let serialized = entity.serialize();
+        println!("{}", serialized);
+        
         // extended attributes
         assert_eq!(entity.b, true);
         assert_eq!(entity.n, never);
 
         // extended behavior
         assert_eq!(entity.my_func(), "my function");
+
+        // deserialization
+        let deserialized = MyEntity::deserialized::<MyEntity>(json.as_bytes()).unwrap();
+        assert_eq!(deserialized.id, "b4d6c6db-7468-400a-8536-a5e83b1f2bdc");
+        assert_eq!(deserialized.b, true);
+        assert_eq!(deserialized.n, never);
+        assert_eq!(deserialized.my_func(), "my function");
+
     }
 }

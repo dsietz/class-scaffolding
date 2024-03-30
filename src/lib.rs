@@ -89,6 +89,7 @@ extern crate serde_json;
 
 use errors::*;
 use serde::{Deserialize, Serialize};
+use serde::de::DeserializeOwned;
 
 /// Supporting Classes
 #[derive(Serialize, Deserialize, Debug, Clone)]
@@ -126,18 +127,22 @@ impl ActivityItem {
 pub trait Scaffolding {
     fn log_activity(&mut self, name: String, descr: String);
     fn get_activity(&self, name: String) -> Vec<ActivityItem>;
-    // fn deserialized(serialized: &[u8]) -> Result<ActivityItem, DeserializeError> {
-    //     match serde_json::from_slice(&serialized) {
-    //         Ok(item) => Ok(item),
-    //         Err(err) => {
-    //             println!("{}", err);
-    //             Err(DeserializeError)
-    //         }
-    //     }
-    // }
-    // fn serialize(&mut self) -> String {
-    //     serde_json::to_string(&self).unwrap()
-    // }
+    fn deserialized<T: DeserializeOwned>(serialized: &[u8]) -> Result<T, DeserializeError> {
+        // let data = String::from_utf8(vec![serialized]);
+        match serde_json::from_slice::<T>(&serialized) {
+            Ok(item) => Ok(item),
+            Err(err) => {
+                println!("{}", err);
+                Err(DeserializeError)
+            }
+        }
+    }
+    fn serialize(&mut self) -> String
+    where
+        Self: Serialize,
+    {
+        serde_json::to_string(&self).unwrap()
+    }
 }
 
 pub mod defaults;
