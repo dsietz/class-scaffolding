@@ -468,6 +468,12 @@ pub trait Scaffolding {
     }
 }
 
+/// The notes behavior of a Scaffolding object
+pub trait ScaffoldingNotes {
+    fn get_note(&self, id: String) -> Option<&Note>;
+    fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String;
+    fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>);
+}
 /// The tagging behavior of a Scaffolding object
 pub trait ScaffoldingTags {
     /// This function adds a tag to the object

@@ -158,14 +158,49 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     };
     gen.into()
 }
+
+// Notes Trait
+#[proc_macro_derive(ScaffoldingNotes)]
+pub fn scaffolding_notes_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+
+    impl_scaffolding_notes(&ast)
+}
+
+
+fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingNotes for #name {
+            fn get_note(&self, id: String) -> Option<&Note> {
+                self.notes.get(&id)
+            }
+
+            fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String {
+                let note = Note::new(auth, cont, acc);
+                let id = note.id.clone();
+                self.notes.insert(id.clone(), note);
+                id
+            }
+
+            fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>) {
+                self.notes
+                    .entry(id)
+                    .and_modify(|note|
+                        note.update(auth, cont, acc)
+                    );
+            }
+        }
+    };
+    gen.into()
+}
+
+
 // Tagging Trait
 #[proc_macro_derive(ScaffoldingTags)]
 pub fn scaffolding_tags_derive(input: TokenStream) -> TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
-    // Build the trait implementation
     impl_scaffolding_tags(&ast)
 }
 
