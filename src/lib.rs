@@ -29,7 +29,7 @@
 //!    This can be done by calling one of the `Scaffolding` trait's many datetime related methods, (e.g.: `add_months()` in conjuctions with `now()`)  
 //!  + The `expire_dtm` is not optional. It must be either provided or automatically generated during instantiation or updates to the object.
 //!    This can be done by calling one of the `Scaffolding` trait's many datetime related methods, (e.g.: `never()`)
-//!  + The `activity` is required and by default is an empty list
+//!  + The `activity` is required and by default is an empty list of activity
 //!
 //! ### Example
 //! Add Scaffolding to a `struct` and `impl` using macros and defaults
