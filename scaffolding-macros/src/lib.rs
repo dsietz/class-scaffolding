@@ -5,14 +5,16 @@ use syn::Expr::Struct;
 use syn::FieldValue;
 use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
+// use serde::Serialize;
 
 static METADATA: &str = "metadata";
-static CORE_ATTRS: [&str; 5] = [
+static CORE_ATTRS: [&str; 6] = [
     "id",
     "created_dtm",
     "modified_dtm",
     "inactive_dtm",
     "expired_dtm",
+    "activity",
 ];
 
 ///
@@ -56,6 +58,13 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
         fields.named.push(
             syn::Field::parse_named
                 .parse2(quote! { expired_dtm: i64 })
+                .unwrap(),
+        );
+
+        // The list of activity performed on the object
+        fields.named.push(
+            syn::Field::parse_named
+                .parse2(quote! { activity: Vec<ActivityItem> })
                 .unwrap(),
         );
 
@@ -110,9 +119,13 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl Scaffolding for #name {
-            // fn set_id(mut &self, value: String) {
-            //     self.id = value;
-            // }
+            fn get_activity(&self, name: String) -> Vec<ActivityItem>{
+                self.activity.iter().filter(|a| a.action == name).cloned().collect()
+            }
+
+            fn log_activity(&mut self, name: String, descr: String) {
+                self.activity.push(ActivityItem::new(name, descr));
+            }
         }
     };
     gen.into()
@@ -149,6 +162,7 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 "modified_dtm",
                                 "inactive_dtm",
                                 "expired_dtm",
+                                "activity",
                             ];
 
                             match attrs.contains(&METADATA.to_string()) {
@@ -199,6 +213,10 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                     }
                                     "expired_dtm" => {
                                         let line: FieldValue = parse_quote! {expired_dtm: defaults::add_years(defaults::now(), 3)};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "activity" => {
+                                        let line: FieldValue = parse_quote! {activity: Vec::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "metadata" => {

@@ -1,10 +1,9 @@
-#[macro_use]
 extern crate scaffolding_core;
 extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use scaffolding_core::defaults;
+    use scaffolding_core::{defaults, ActivityItem};
     use scaffolding_macros::*;
     use std::collections::BTreeMap;
 
