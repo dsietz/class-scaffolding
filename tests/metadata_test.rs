@@ -3,12 +3,13 @@ extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use scaffolding_core::{defaults, ActivityItem};
+    use scaffolding_core::{defaults, ActivityItem, Scaffolding};
     use scaffolding_macros::*;
+    use serde_derive::{Deserialize, Serialize};
     use std::collections::BTreeMap;
 
     #[scaffolding_struct("metadata")]
-    #[derive(Debug, Clone)]
+    #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]
     struct MyEntity {}
 
     impl MyEntity {
