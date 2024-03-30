@@ -8,6 +8,7 @@ use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, Li
 // use serde::Serialize;
 
 static METADATA: &str = "metadata";
+static TAGS: &str = "tags";
 static CORE_ATTRS: [&str; 6] = [
     "id",
     "created_dtm",
@@ -80,6 +81,19 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
             }
             false => {}
         }
+
+        // optional attributes
+        match attrs.contains(&TAGS.to_string()) {
+            true => {
+                // The tags handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { tags: Vec<String> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
     }
 
     return quote! {
@@ -130,7 +144,51 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     };
     gen.into()
 }
+// Tagging Trait
+#[proc_macro_derive(ScaffoldingTags)]
+pub fn scaffolding_tags_derive(input: TokenStream) -> TokenStream {
+    // Construct a representation of Rust code as a syntax tree
+    // that we can manipulate
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
+    // Build the trait implementation
+    impl_scaffolding_tags(&ast)
+}
+
+fn impl_scaffolding_tags(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingTags for #name {
+            fn add_tag(&mut self, tag: String) {
+                // don't add duplicates
+                match self.has_tag(tag.clone()) {
+                    false => {
+                        self.tags.push(tag);
+                    },
+                    true => {
+                        println!("Ignoring tag {}. Tag already exists!", tag);
+                    },
+                }
+            }
+            fn has_tag(&self, tag: String) -> bool {
+                let results = self.tags.iter().filter(|t| **t == tag).cloned().collect::<String>();
+                match results.len() {
+                    0 => false,
+                    _ => true,
+                }
+            }
+            fn remove_tag(&mut self, tag: String) {
+                let pos = self.tags.iter().position(|t| **t == tag).unwrap();
+                self.tags.remove(pos);
+            }
+        }
+    };
+    gen.into()
+}
+
+///
+/// Modify functions
+///
 #[proc_macro_attribute]
 pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
     let mut item: syn::Item = syn::parse(input).unwrap();
@@ -171,6 +229,14 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 }
                                 _ => {}
                             }
+
+                            match attrs.contains(&TAGS.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&TAGS);
+                                }
+                                _ => {}
+                            }
+
                             // first determine if the attributes already exist
                             for f in 0..expr_struct.fields.len() {
                                 match &expr_struct.fields[f].member {
@@ -222,6 +288,10 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                     "metadata" => {
                                         let line: FieldValue =
                                             parse_quote! {metadata: BTreeMap::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "tags" => {
+                                        let line: FieldValue = parse_quote! {tags: Vec::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     _ => {}

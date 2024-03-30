@@ -36,21 +36,21 @@
 //! ```rust
 //! extern crate scaffolding_core;
 //!
-//! use scaffolding_core::{defaults, ActivityItem, Scaffolding};
+//! use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
 //! use scaffolding_macros::*;
 //! use serde_derive::{Deserialize, Serialize};
 //! // Required for scaffolding metadata functionality
 //! use std::collections::BTreeMap;
 //!
-//! #[scaffolding_struct("metadata")]
-//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding)]
+//! #[scaffolding_struct("metadata","tags")]
+//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
 //! struct MyEntity {
 //!     a: bool,
 //!     b: String,
 //! }
 //!
 //! impl MyEntity {
-//!     #[scaffolding_fn("metadata")]
+//!     #[scaffolding_fn("metadata","tags")]
 //!     fn new(arg: bool) -> Self {
 //!         let msg = format!("You said it is {}", arg);
 //!         Self {
@@ -83,6 +83,14 @@
 //! // use the metadata functionality
 //! entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
 //! assert_eq!(entity.metadata.len(), 1);
+//!
+//! // manage tags
+//! entity.add_tag("tag_1".to_string());
+//! entity.add_tag("tag_2".to_string());
+//! entity.add_tag("tag_3".to_string());
+//! assert!(entity.has_tag("tag_1".to_string()));
+//! entity.remove_tag("tag_2".to_string());
+//! assert_eq!(entity.tags.len(), 2);
 //!
 //! // extended attributes
 //! assert_eq!(entity.a, true);
@@ -131,7 +139,7 @@ impl ActivityItem {
     }
 }
 
-/// The core behavior of an Scaffolding object
+/// The core behavior of a Scaffolding object
 pub trait Scaffolding {
     /// This function adds a ActivityItem to the activity log
     ///
@@ -294,6 +302,107 @@ pub trait Scaffolding {
     }
 }
 
+/// The tagging behavior of a Scaffolding object
+pub trait ScaffoldingTags {
+    /// This function adds a tag to the object
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// #[macro_use]
+    /// // extern crate scaffolding_core;
+    /// // extern crate scaffolding_macros;
+    ///     
+    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    ///
+    /// #[scaffolding_struct("tags")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("tags")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// entity.add_tag("tag_1".to_string());
+    /// // ignore any duplicates
+    /// entity.add_tag("tag_1".to_string());
+    /// entity.add_tag("tag_2".to_string());
+    /// entity.add_tag("tag_3".to_string());
+    ///
+    /// assert_eq!(entity.tags.len(), 3);
+    /// ```
+    fn add_tag(&mut self, tag: String);
+    /// This function determines if the object has a specific tag
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// #[macro_use]
+    /// // extern crate scaffolding_core;
+    /// // extern crate scaffolding_macros;
+    ///     
+    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    ///
+    /// #[scaffolding_struct("tags")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("tags")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// entity.add_tag("tag_1".to_string());
+    ///
+    /// assert!(entity.has_tag("tag_1".to_string()));
+    /// ```
+    fn has_tag(&self, tag: String) -> bool;
+    /// This function removes a specific tag from the object
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// #[macro_use]
+    /// // extern crate scaffolding_core;
+    /// // extern crate scaffolding_macros;
+    ///     
+    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    ///
+    /// #[scaffolding_struct("tags")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("tags")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// entity.add_tag("tag_1".to_string());
+    /// assert_eq!(entity.tags.len(), 1);
+    /// entity.remove_tag("tag_1".to_string());
+    /// assert_eq!(entity.tags.len(), 0);
+    /// ```
+    fn remove_tag(&mut self, tag: String);
+}
 pub mod defaults;
 pub mod errors;
 
