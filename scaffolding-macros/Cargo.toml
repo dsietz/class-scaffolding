@@ -1,6 +1,6 @@
 [package]
 name = "scaffolding-macros"
-version = "0.3.0"
+version = "0.3.1"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 edition = "2021"
 readme = "README.md"
