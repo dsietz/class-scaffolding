@@ -1,6 +1,6 @@
 [package]
 name = "scaffolding-core"
-version = "0.3.1"
+version = "0.3.0"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 categories = ["development-tools"]
 description = "A software development kit that provides the scaffolding for building applications and services."
