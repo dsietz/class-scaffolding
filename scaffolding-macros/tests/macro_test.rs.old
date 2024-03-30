@@ -1,10 +1,18 @@
 // #[macro_use]
 extern crate scaffolding_macros;
 
+
 #[cfg(test)]
 mod tests {
     use scaffolding_macros::*;
     use std::collections::BTreeMap;
+
+    #[derive(Debug, Clone)]
+    struct ActivityItem {
+        created_dtm: i64,
+        action: String,
+        description: String,
+    }
 
     #[scaffolding_struct("metadata")]
     #[derive(Debug, Clone)]

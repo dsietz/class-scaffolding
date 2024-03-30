@@ -34,7 +34,7 @@
 //! ```rust
 //! extern crate scaffolding_core;
 //!
-//! use scaffolding_core::{defaults};
+//! use scaffolding_core::{defaults, ActivityItem};
 //! use scaffolding_macros::*;
 //! // Required for scaffolding metadata functionality
 //! use std::collections::BTreeMap;
@@ -83,8 +83,94 @@
 //! // extended behavior
 //! assert_eq!(entity.my_func(), "my function");
 //! ```
+#[macro_use]
+
+extern crate serde_derive;
+extern crate serde_json;
+
+use errors::*;
+use serde::{Deserialize, Serialize};
+
+/// Supporting Classes
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ActivityItem {
+    pub created_dtm: i64,
+    pub action: String,
+    pub description: String,
+}
+
+impl ActivityItem {
+    pub fn new(name: String, descr: String) -> Self {
+        Self {
+            created_dtm: defaults::now(),
+            action: name,
+            description: descr,
+        }
+    }
+
+    pub fn deserialized(serialized: &[u8]) -> Result<ActivityItem, DeserializeError> {
+        match serde_json::from_slice(&serialized) {
+            Ok(item) => Ok(item),
+            Err(err) => {
+                println!("{}", err);
+                Err(DeserializeError)
+            }
+        }
+    }
+
+    pub fn serialize(&mut self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+}
 
 /// The core behavior of an Scaffolding object
-pub trait Scaffolding {}
+pub trait Scaffolding {
+    fn log_activity(&mut self, name: String, descr: String);
+    fn get_activity(&self, name: String) -> Vec<ActivityItem>;
+    // fn deserialized(serialized: &[u8]) -> Result<ActivityItem, DeserializeError> {
+    //     match serde_json::from_slice(&serialized) {
+    //         Ok(item) => Ok(item),
+    //         Err(err) => {
+    //             println!("{}", err);
+    //             Err(DeserializeError)
+    //         }
+    //     }
+    // }
+    // fn serialize(&mut self) -> String {
+    //     serde_json::to_string(&self).unwrap()
+    // }
+}
 
 pub mod defaults;
+pub mod errors;
+
+#[cfg(test)]
+mod tests {
+    use crate::{defaults, ActivityItem};
+
+    fn get_actionitem() -> ActivityItem {
+        ActivityItem::new(
+            "updated".to_string(),
+            "The object has been updated.".to_string(),
+        )
+    }
+    #[test]
+    fn test_activityitem_new() {
+        let ai = get_actionitem();
+
+        assert_eq!(ai.created_dtm, defaults::now());
+        assert_eq!(ai.action, "updated".to_string());
+        assert_eq!(ai.description, "The object has been updated.".to_string());
+    }
+
+    #[test]
+    fn test_activityitem_serialization() {
+        let serialized = r#"{"created_dtm":1711760135,"action":"updated","description":"The object has been updated."}"#;
+        let mut ai = ActivityItem::deserialized(&serialized.as_bytes()).unwrap();
+        
+        assert_eq!(ai.created_dtm, 1711760135);
+        assert_eq!(ai.action, "updated".to_string());
+        assert_eq!(ai.description, "The object has been updated.".to_string());
+        assert_eq!(ai.serialize(), serialized);
+    }
+}
