@@ -133,9 +133,66 @@ impl ActivityItem {
 
 /// The core behavior of an Scaffolding object
 pub trait Scaffolding {
-    /// This funciton adds a ActivityItem to the activity log
+    /// This function adds a ActivityItem to the activity log
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// #[macro_use]
+    /// // extern crate scaffolding_core;
+    /// // extern crate scaffolding_macros;
+    ///     
+    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    ///
+    /// #[scaffolding_struct]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
+    /// assert_eq!(entity.activity.len(), 1);
+    /// ```
     fn log_activity(&mut self, name: String, descr: String);
     /// This function retrieves all the ActivityItems that have the specified action (name)
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// #[macro_use]
+    /// // extern crate scaffolding_core;
+    /// // extern crate scaffolding_macros;
+    ///     
+    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    ///
+    /// #[scaffolding_struct]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// entity.log_activity("ordered".to_string(), "The customer has place the order".to_string());
+    /// entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
+    /// assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
+    /// ```
     fn get_activity(&self, name: String) -> Vec<ActivityItem>;
     /// This function instantiates an entity from a JSON string.
     ///
