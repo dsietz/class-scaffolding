@@ -19,11 +19,13 @@ For software development teams who appreciate a kick-start to their object orien
 ---
 
 ## What's New
+| :warning: Please Note!                                                                  |
+| ----------------------------------------------------------------------------- |
+| This crate is in an `beta` release phase and is only intended as experimental.|
 
-!!! This crate is in an `Initial` release phase and is only intended as a PoC. !!!
-
-**0.1.0**
-+ [Added Metadata feature](https://github.com/dsietz/scaffolding-core/issues/2)
+**0.2.0**
++ [Add Activity Logging](https://github.com/dsietz/scaffolding-core/issues/18)
++ [Provide the ability to Serialize and Deserialize](https://github.com/dsietz/scaffolding-core/issues/19)
 
 ## How to Contribute
 

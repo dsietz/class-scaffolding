@@ -15,7 +15,7 @@ license = "Apache-2.0"
 name = "scaffolding-core"
 readme = "README.md"
 repository = "https://github.com/dsietz/scaffolding-core"
-version = "0.1.0"
+version = "0.2.0"
 
 [badges]
 maintenance = {status = "experimental"}
@@ -26,7 +26,10 @@ path = "src/lib.rs"
 
 [dependencies]
 chrono = "0.4.35"
-scaffolding-macros = {path = "./scaffolding-macros", version = "0.1.0"}
+scaffolding-macros = {path = "./scaffolding-macros", version = "0.2.0"}
+serde = "1.0.197"
+serde_derive = "1.0"
+serde_json = "1.0"
 
 [dependencies.uuid]
 features = ["v4"]
