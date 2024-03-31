@@ -197,7 +197,7 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
                     let mut cont = String::from_utf8(note.content.clone())
                     .map_err(|non_utf8| String::from_utf8_lossy(non_utf8.as_bytes()).into_owned())
                     .unwrap();
-                
+
                     match cont.contains(&search) {
                         true => {
                             results.push(note.clone())
@@ -205,7 +205,7 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
                         false => {},
                     }
                 }
-                
+
                 results
             }
 
