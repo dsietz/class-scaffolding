@@ -85,8 +85,11 @@ mod tests {
             "Nonething to find here".as_bytes().to_vec(),
             Some("private".to_string()),
         );
-        
-        assert_eq!(entity.get_note(id).unwrap().content_as_string().unwrap(), "This was updated".to_string());
+
+        assert_eq!(
+            entity.get_note(id).unwrap().content_as_string().unwrap(),
+            "This was updated".to_string()
+        );
     }
 
     #[test]
@@ -126,13 +129,12 @@ mod tests {
     fn test_special_characters() {
         let mut entity = MyEntity::new();
         let msg = "Th帝s is a speciàl character messagæ.";
-        let id = entity.insert_note(
-            "someone".to_string(),
-            msg.as_bytes().to_vec(),
-            None,
+        let id = entity.insert_note("someone".to_string(), msg.as_bytes().to_vec(), None);
+
+        assert_eq!(
+            entity.get_note(id).unwrap().content_as_string().unwrap(),
+            msg.to_string()
         );
-        
-        assert_eq!(entity.get_note(id).unwrap().content_as_string().unwrap(), msg.to_string());
     }
 
     #[test]
@@ -164,5 +166,4 @@ mod tests {
             "This was updated again".to_string()
         );
     }
-
 }
