@@ -29,7 +29,17 @@ mod tests {
             "This was updated".as_bytes().to_vec(),
             None,
         );
-        assert_eq!(entity.notes.len(), 1);
+        let _ = entity.insert_note(
+            "fsmith".to_string(),
+            "Something to find here".as_bytes().to_vec(),
+            None,
+        );
+        let _ = entity.insert_note(
+            "fsmith".to_string(),
+            "Nonething to find here".as_bytes().to_vec(),
+            Some("private".to_string()),
+        );
+        assert_eq!(entity.notes.len(), 3);
 
         entity.modify_note(
             id.clone(),
@@ -37,7 +47,6 @@ mod tests {
             "This was updated again".as_bytes().to_vec(),
             Some("private".to_string()),
         );
-
         assert_eq!(
             entity.get_note(id.clone()).unwrap().access,
             "private".to_string()
@@ -46,6 +55,12 @@ mod tests {
             entity.get_note(id.clone()).unwrap().content,
             "This was updated again".as_bytes().to_vec()
         );
-        assert_eq!(entity.notes.len(), 1);
+        assert_eq!(entity.notes.len(), 3);
+
+        let search_results = entity.search_notes("thing".to_string());
+        println!("{:?}", search_results);
+
+        entity.remove_note(id);
+        assert_eq!(entity.notes.len(), 2);
     }
 }

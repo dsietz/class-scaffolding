@@ -190,11 +190,31 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
                         note.update(auth, cont, acc)
                     );
             }
+
+            fn search_notes(&mut self, search: String) -> Vec<Note> {
+                let results: Vec<Note> = Vec::new();
+
+                for (key, note) in self.notes.iter() {
+                    let mut cont = String::from_utf8(note.content.clone())
+                    .map_err(|non_utf8| String::from_utf8_lossy(non_utf8.as_bytes()).into_owned())
+                    .unwrap();
+                
+                    match cont.contains(&search) {
+                        true => results.push(note.clone()),
+                        false => {},
+                    }
+                }
+                
+                results
+            }
+
+            fn remove_note(&mut self, id: String) {
+                self.notes.remove(&id);
+            }
         }
     };
     gen.into()
 }
-
 
 // Tagging Trait
 #[proc_macro_derive(ScaffoldingTags)]

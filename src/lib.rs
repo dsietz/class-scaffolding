@@ -473,6 +473,8 @@ pub trait ScaffoldingNotes {
     fn get_note(&self, id: String) -> Option<&Note>;
     fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String;
     fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>);
+    fn search_notes(&mut self, search: String) -> Vec<Note>;
+    fn remove_note(&mut self, id: String);
 }
 /// The tagging behavior of a Scaffolding object
 pub trait ScaffoldingTags {
