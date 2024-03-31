@@ -4,15 +4,15 @@
 use chrono::{DateTime, Duration, Months, Utc};
 use uuid::Uuid;
 
-/// generates a uuid v4 value
+/// generate the default value for access management
 ///
 /// ```rust
 /// use scaffolding_core::defaults::*;
 ///
-/// assert_eq!(id().len(), "54324f57-9e6b-4142-b68d-1d4c86572d0a".len());
+/// assert_eq!(access(), "public".to_string());
 /// ```
-pub fn id() -> String {
-    Uuid::new_v4().to_string()
+pub fn access() -> String {
+    "public".to_string()
 }
 
 /// adds x days to the timestamp
@@ -49,6 +49,17 @@ pub fn add_months(dtm: i64, months: u32) -> i64 {
 pub fn add_years(dtm: i64, years: u32) -> i64 {
     let dt = DateTime::from_timestamp(dtm, 0).unwrap() + Months::new(years * 12);
     dt.timestamp()
+}
+
+/// generates a uuid v4 value
+///
+/// ```rust
+/// use scaffolding_core::defaults::*;
+///
+/// assert_eq!(id().len(), "54324f57-9e6b-4142-b68d-1d4c86572d0a".len());
+/// ```
+pub fn id() -> String {
+    Uuid::new_v4().to_string()
 }
 
 /// provided the default unix epoch time (UTC) as seconds
