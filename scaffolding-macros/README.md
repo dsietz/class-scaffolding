@@ -8,12 +8,11 @@
   - [What's New](#whats-new)
 
 ---
-:exclamation: This crate is published as a dependency for the [scaffolding-core](https://crates.io/crates/scaffolding-core) crate.
 
 ## What's New
+| :warning: Please Note!                                                                  |
+| ----------------------------------------------------------------------------- |
+| This crate is published as a dependency for the [scaffolding-core](https://crates.io/crates/scaffolding-core) crate. |
 
-This crate is in an `Initial` release phase and is only intended as a PoC.
-
-
-**0.0.1**
-+ [Initial Release](https://github.com/dsietz/class-scaffolding/issues/1)
+**0.4.0**
++ [Provide the ability to manage notes](https://github.com/dsietz/scaffolding-core/issues/29)

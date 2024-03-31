@@ -8,6 +8,7 @@ use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, Li
 // use serde::Serialize;
 
 static METADATA: &str = "metadata";
+static NOTES: &str = "notes";
 static TAGS: &str = "tags";
 static CORE_ATTRS: [&str; 6] = [
     "id",
@@ -83,6 +84,19 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
         }
 
         // optional attributes
+        match attrs.contains(&NOTES.to_string()) {
+            true => {
+                // The notes handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { notes: BTreeMap<String, Note> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
+
+        // optional attributes
         match attrs.contains(&TAGS.to_string()) {
             true => {
                 // The tags handler
@@ -144,14 +158,70 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     };
     gen.into()
 }
+
+// Notes Trait
+#[proc_macro_derive(ScaffoldingNotes)]
+pub fn scaffolding_notes_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+
+    impl_scaffolding_notes(&ast)
+}
+
+fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingNotes for #name {
+            fn get_note(&self, id: String) -> Option<&Note> {
+                self.notes.get(&id)
+            }
+
+            fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String {
+                let note = Note::new(auth, cont, acc);
+                let id = note.id.clone();
+                self.notes.insert(id.clone(), note);
+                id
+            }
+
+            fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>) {
+                self.notes
+                    .entry(id)
+                    .and_modify(|note|
+                        note.update(auth, cont, acc)
+                    );
+            }
+
+            fn search_notes(&mut self, search: String) -> Vec<Note> {
+                let mut results: Vec<Note> = Vec::new();
+
+                for (key, note) in self.notes.iter() {
+                    let mut cont = String::from_utf8(note.content.clone())
+                    .map_err(|non_utf8| String::from_utf8_lossy(non_utf8.as_bytes()).into_owned())
+                    .unwrap();
+
+                    match cont.contains(&search) {
+                        true => {
+                            results.push(note.clone())
+                        },
+                        false => {},
+                    }
+                }
+
+                results
+            }
+
+            fn remove_note(&mut self, id: String) {
+                self.notes.remove(&id);
+            }
+        }
+    };
+    gen.into()
+}
+
 // Tagging Trait
 #[proc_macro_derive(ScaffoldingTags)]
 pub fn scaffolding_tags_derive(input: TokenStream) -> TokenStream {
-    // Construct a representation of Rust code as a syntax tree
-    // that we can manipulate
     let ast: syn::DeriveInput = syn::parse(input).unwrap();
 
-    // Build the trait implementation
     impl_scaffolding_tags(&ast)
 }
 
@@ -230,6 +300,13 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 _ => {}
                             }
 
+                            match attrs.contains(&NOTES.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&NOTES);
+                                }
+                                _ => {}
+                            }
+
                             match attrs.contains(&TAGS.to_string()) {
                                 true => {
                                     modify_attr_list.push(&TAGS);
@@ -288,6 +365,11 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                     "metadata" => {
                                         let line: FieldValue =
                                             parse_quote! {metadata: BTreeMap::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "notes" => {
+                                        let line: FieldValue =
+                                            parse_quote! {notes: BTreeMap::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "tags" => {
