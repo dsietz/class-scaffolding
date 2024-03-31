@@ -52,13 +52,17 @@ mod tests {
             "private".to_string()
         );
         assert_eq!(
-            entity.get_note(id.clone()).unwrap().content,
-            "This was updated again".as_bytes().to_vec()
+            entity
+                .get_note(id.clone())
+                .unwrap()
+                .content_as_string()
+                .unwrap(),
+            "This was updated again".to_string()
         );
         assert_eq!(entity.notes.len(), 3);
 
         let search_results = entity.search_notes("thing".to_string());
-        println!("{:?}", search_results);
+        assert_eq!(search_results.len(), 2);
 
         entity.remove_note(id);
         assert_eq!(entity.notes.len(), 2);

@@ -167,7 +167,6 @@ pub fn scaffolding_notes_derive(input: TokenStream) -> TokenStream {
     impl_scaffolding_notes(&ast)
 }
 
-
 fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
@@ -192,7 +191,7 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
             }
 
             fn search_notes(&mut self, search: String) -> Vec<Note> {
-                let results: Vec<Note> = Vec::new();
+                let mut results: Vec<Note> = Vec::new();
 
                 for (key, note) in self.notes.iter() {
                     let mut cont = String::from_utf8(note.content.clone())
@@ -200,7 +199,9 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
                     .unwrap();
                 
                     match cont.contains(&search) {
-                        true => results.push(note.clone()),
+                        true => {
+                            results.push(note.clone())
+                        },
                         false => {},
                     }
                 }

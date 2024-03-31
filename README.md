@@ -13,6 +13,7 @@ For software development teams who appreciate a kick-start to their object orien
 - [Scaffolding Core](#scaffolding-core)
     - [Table of Contents](#table-of-contents)
   - [What's New](#whats-new)
+  - [Usage](#usage)
   - [How to Contribute](#how-to-contribute)
   - [License](#license)
 
@@ -25,6 +26,109 @@ For software development teams who appreciate a kick-start to their object orien
 
 **0.4.0**
 + [Provide the ability to manage notes](https://github.com/dsietz/scaffolding-core/issues/29)
+
+## Usage
+Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
+
+```rust
+extern crate scaffolding_core;
+
+use scaffolding_core::{defaults, ActivityItem, Note, Scaffolding, ScaffoldingNotes, ScaffoldingTags};
+use scaffolding_macros::*;
+use serde_derive::{Deserialize, Serialize};
+// Required for scaffolding metadata functionality
+use std::collections::BTreeMap;
+
+// (1) Define the structure - Required
+#[scaffolding_struct("metadata","notes","tags")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingNotes, ScaffoldingTags)]
+struct MyEntity {
+    a: bool,
+    b: String,
+}
+
+impl MyEntity {
+    // (2) Define the constructor - Optional
+    //     Note: Any of the Scaffodling attributes that are set here 
+    //           will not be overwritten when generated. For example
+    //           the `id` attribute, if uncommented, would be ignored.
+    #[scaffolding_fn("metadata","notes","tags")]
+    fn new(arg: bool) -> Self {
+        let msg = format!("You said it is {}", arg);
+        Self {
+            // id: "my unique identitifer".to_string(),
+            a: arg,
+            b: msg
+        }
+    }
+
+    fn my_func(&self) -> String {
+        "my function".to_string()
+    }
+}
+
+let mut entity = MyEntity::new(true);
+
+/* scaffolding attributes */
+assert_eq!(entity.id.len(), "54324f57-9e6b-4142-b68d-1d4c86572d0a".len());
+assert_eq!(entity.created_dtm, defaults::now());
+assert_eq!(entity.modified_dtm, defaults::now());
+// becomes inactive in 90 days
+assert_eq!(entity.inactive_dtm, defaults::add_days(defaults::now(), 90));
+// expires in 3 years
+assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
+
+/* use the activity log functionality  */
+// (1) Log an activity
+entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
+// (2) Get activities
+assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
+
+/* use the notes functionality */
+// (1) Insert a note
+let note_id = entity.insert_note(
+  "fsmith".to_string(),
+  "This was updated".as_bytes().to_vec(),
+  None,
+);
+// (2) Modify the note
+entity.modify_note(
+  note_id.clone(),
+  "fsmith".to_string(),
+  "This was updated again".as_bytes().to_vec(),
+  Some("private".to_string()),
+);
+// (3) Read the note's content
+let read_note = entity.get_note(note_id.clone()).unwrap().content_as_string().unwrap();
+println!("{}", read_note);
+// (4) Search for notes that contain the word `updated`
+let search_results = entity.search_notes("updated".to_string());
+assert_eq!(search_results.len(), 1);
+// (5) Delete the note
+entity.remove_note(note_id);
+
+/* use the metadata functionality
+   Note: `memtadata` is a BTreeMap<String, String>
+          https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
+*/
+entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
+assert_eq!(entity.metadata.len(), 1);
+
+// manage tags
+entity.add_tag("tag_1".to_string());
+entity.add_tag("tag_2".to_string());
+entity.add_tag("tag_3".to_string());
+assert!(entity.has_tag("tag_1".to_string()));
+entity.remove_tag("tag_2".to_string());
+assert_eq!(entity.tags.len(), 2);
+
+/* extended attributes */
+assert_eq!(entity.a, true);
+assert_eq!(entity.b, "You said it is true");
+
+/* extended behavior */
+assert_eq!(entity.my_func(), "my function");
+```
 
 ## How to Contribute
 

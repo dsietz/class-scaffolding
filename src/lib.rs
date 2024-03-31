@@ -32,28 +32,34 @@
 //!  + The `activity` is required and by default is an empty list of activity
 //!
 //! ### Example
-//! Add Scaffolding to a `struct` and `impl` using macros and defaults
+//! Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
 //! ```rust
 //! extern crate scaffolding_core;
 //!
-//! use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
+//! use scaffolding_core::{defaults, ActivityItem, Note, Scaffolding, ScaffoldingNotes, ScaffoldingTags};
 //! use scaffolding_macros::*;
 //! use serde_derive::{Deserialize, Serialize};
 //! // Required for scaffolding metadata functionality
 //! use std::collections::BTreeMap;
 //!
-//! #[scaffolding_struct("metadata","tags")]
-//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
+//! // (1) Define the structure - Required
+//! #[scaffolding_struct("metadata","notes","tags")]
+//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingNotes, ScaffoldingTags)]
 //! struct MyEntity {
 //!     a: bool,
 //!     b: String,
 //! }
 //!
 //! impl MyEntity {
-//!     #[scaffolding_fn("metadata","tags")]
+//!     // (2) Define the constructor - Optional
+//!     //     Note: Any of the Scaffodling attributes that are set here
+//!     //           will not be overwritten when generated. For example
+//!     //           the `id` attribute, if uncommented, would be ignored.
+//!     #[scaffolding_fn("metadata","notes","tags")]
 //!     fn new(arg: bool) -> Self {
 //!         let msg = format!("You said it is {}", arg);
 //!         Self {
+//!             // id: "my unique identitifer".to_string(),
 //!             a: arg,
 //!             b: msg
 //!         }
@@ -65,9 +71,8 @@
 //! }
 //!
 //! let mut entity = MyEntity::new(true);
-//! println!("{:?}", entity);
 //!
-//! // scaffolding attributes
+//! /* scaffolding attributes */
 //! assert_eq!(entity.id.len(), "54324f57-9e6b-4142-b68d-1d4c86572d0a".len());
 //! assert_eq!(entity.created_dtm, defaults::now());
 //! assert_eq!(entity.modified_dtm, defaults::now());
@@ -76,11 +81,36 @@
 //! // expires in 3 years
 //! assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
 //!
-//! // add activity to the activty log
+//! /* use the activity log functionality  */
+//! // (1) Log an activity
 //! entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
+//! // (2) Get activities
 //! assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
 //!
-//! // use the metadata functionality
+//! /* use the notes functionality */
+//! // (1) Insert a note
+//! let note_id = entity.insert_note(
+//!   "fsmith".to_string(),
+//!   "This was updated".as_bytes().to_vec(),
+//!   None,
+//! );
+//! // (2) Modify the note
+//! entity.modify_note(
+//!   note_id.clone(),
+//!   "fsmith".to_string(),
+//!   "This was updated again".as_bytes().to_vec(),
+//!   Some("private".to_string()),
+//! );
+//! // (3) Read the note's content
+//! let read_note = entity.get_note(note_id.clone()).unwrap().content_as_string().unwrap();
+//! println!("{}", read_note);
+//! // (4) Search for notes that contain the word `updated`
+//! let search_results = entity.search_notes("updated".to_string());
+//! assert_eq!(search_results.len(), 1);
+//! // (5) Delete the note
+//! entity.remove_note(note_id);
+//!
+//! /* use the metadata functionality */
 //! entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
 //! assert_eq!(entity.metadata.len(), 1);
 //!
@@ -224,6 +254,21 @@ impl Note {
             },
             content: cont,
         }
+    }
+
+    /// This function returns the content of the note as a string.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::{defaults, Note};
+    ///
+    /// let note = Note::new("fsmith".to_string(), "This was updated".as_bytes().to_vec(), None);
+    /// assert_eq!(note.content_as_string().unwrap(), "This was updated".to_string());
+    /// ```
+    pub fn content_as_string(&self) -> Result<String, String> {
+        String::from_utf8(self.content.clone())
+            .map_err(|non_utf8| String::from_utf8_lossy(non_utf8.as_bytes()).into_owned())
     }
 
     /// This function instantiates an ActivityItem from a JSON string.
