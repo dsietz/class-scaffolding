@@ -259,8 +259,8 @@ impl Address {
 #[scaffolding_struct]
 #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]
 pub struct Entity {
-    // The type of address, (e.g.: Billing, Shipping, Home, Work, etc.)
-    pub category: String,
+    // The related addresses
+    pub addresses: Vec<Address>,
 }
 
 impl Entity {
@@ -269,14 +269,130 @@ impl Entity {
     /// #Example
     ///
     /// ```rust
-    /// // extern crate scaffolding_core;
+    /// extern crate scaffolding_core;
     ///     
-    /// use scaffolding_core::{defaults, ActivityItem};
+    /// use scaffolding_core::entity::Entity;
     ///
-    /// let mut activity_item = ActivityItem::new("updated".to_string(), "This was updated".to_string());
+    /// fn main() {
+    ///   let entity = Entity::new();
+    ///
+    ///   // scaffolding attributes
+    ///   println!("{}", entity.id);
+    ///   println!("{}", entity.created_dtm);
+    ///   println!("{}", entity.modified_dtm,);
+    ///   println!("{}", entity.inactive_dtm);
+    ///   println!("{}", entity.expired_dtm );
+    /// }
     /// ```
     #[scaffolding_fn]
-    pub fn new(category: String) -> Self {
-        Self { category: category }
+    pub fn new() -> Self {
+        Self {
+            addresses: Vec::new(),
+        }
+    }
+
+    /// Adds a related Address to the Entity and returns the Address for reference.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::entity::Entity;
+    ///
+    /// fn main() {
+    ///   let mut entity = Entity::new();
+    ///
+    ///   let _ = entity.add_address(
+    ///       "shipping".to_string(),
+    ///       "acmes company".to_string(),
+    ///       "14 Main Street".to_string(),
+    ///       "Big City, NY 038845".to_string(),
+    ///       "USA".to_string(),
+    ///       "USA".to_string(),
+    ///   );
+    ///
+    ///   assert_eq!(entity.addresses.len(), 1);
+    /// }
+    /// ```
+    pub fn add_address(
+        &mut self,
+        category: String,
+        line_1: String,
+        line_2: String,
+        line_3: String,
+        line_4: String,
+        country_code: String,
+    ) -> Address {
+        let address = Address::new(category, line_1, line_2, line_3, line_4, country_code);
+        self.addresses.push(address.clone());
+        return address;
+    }
+
+    /// Retrieves all the Addresses with the specified category.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::entity::Entity;
+    ///
+    /// fn main() {
+    ///   let mut entity = Entity::new();
+    ///
+    ///   let address = entity.add_address(
+    ///       "shipping".to_string(),
+    ///       "acmes company".to_string(),
+    ///       "14 Main Street".to_string(),
+    ///       "Big City, NY 038845".to_string(),
+    ///       "USA".to_string(),
+    ///       "USA".to_string(),
+    ///   );
+    ///   assert_eq!(entity.addresses_by_category("shipping".to_string()).len(), 1);
+    /// }
+    /// ```
+    pub fn addresses_by_category(&self, category: String) -> Vec<&Address> {
+        self.addresses
+            .iter()
+            .filter(|a| a.category == category)
+            .collect()
+    }
+
+    /// Adds a related Address to the Entity and returns the Address for reference.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::entity::Entity;
+    ///
+    /// fn main() {
+    ///   let mut entity = Entity::new();
+    ///
+    ///   let address = entity.add_address(
+    ///       "shipping".to_string(),
+    ///       "acmes company".to_string(),
+    ///       "14 Main Street".to_string(),
+    ///       "Big City, NY 038845".to_string(),
+    ///       "USA".to_string(),
+    ///       "USA".to_string(),
+    ///   );
+    ///   assert_eq!(entity.addresses.len(), 1);
+    ///
+    ///   entity.remove_address(address.id);
+    ///   assert_eq!(entity.addresses.len(), 0);
+    /// }
+    /// ```
+    pub fn remove_address(&mut self, id: String) {
+        match self.addresses.iter().position(|a| a.id == id) {
+            Some(idx) => {
+                self.addresses.remove(idx);
+            }
+            None => {
+                // do nothing
+            }
+        }
     }
 }
