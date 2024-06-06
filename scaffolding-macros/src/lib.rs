@@ -21,7 +21,7 @@ static CORE_ATTRS: [&str; 6] = [
 
 ///
 /// Modifying a struct
-/// 
+///
 /// Dynammically adds the following public attributes to the struct
 /// + id: String
 /// + created_dtm: i64
