@@ -22,7 +22,7 @@ mod tests {
     #[test]
     fn test_add_note() {
         let mut entity = MyEntity::new();
-        let id = entity.insert_note(
+        let _id = entity.insert_note(
             "fsmith".to_string(),
             "This was updated".as_bytes().to_vec(),
             None,

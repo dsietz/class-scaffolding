@@ -618,6 +618,8 @@ pub trait ScaffoldingTags {
 
 // modules
 pub mod defaults;
+#[cfg(feature = "person")]
+pub mod entity;
 pub mod errors;
 
 #[cfg(test)]

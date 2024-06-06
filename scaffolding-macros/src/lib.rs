@@ -21,6 +21,14 @@ static CORE_ATTRS: [&str; 6] = [
 
 ///
 /// Modifying a struct
+/// 
+/// Dynammically adds the following public attributes to the struct
+/// + id: String
+/// + created_dtm: i64
+/// + modified_dtm: i64
+/// + inactive_dtm: i64
+/// + expired_dtm: i64
+/// + activity: Vec<ActivityItem>
 ///
 #[proc_macro_attribute]
 pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -35,38 +43,38 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
         // The unique identifier of the object
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { id: String })
+                .parse2(quote! { pub id: String })
                 .unwrap(),
         );
         // The timestamp when the object was created
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { created_dtm: i64 })
+                .parse2(quote! { pub created_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object was last modified
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { modified_dtm: i64 })
+                .parse2(quote! { pub modified_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object is no longer active
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { inactive_dtm: i64 })
+                .parse2(quote! { pub inactive_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object is expired
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { expired_dtm: i64 })
+                .parse2(quote! { pub expired_dtm: i64 })
                 .unwrap(),
         );
 
         // The list of activity performed on the object
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { activity: Vec<ActivityItem> })
+                .parse2(quote! { pub activity: Vec<ActivityItem> })
                 .unwrap(),
         );
 
@@ -257,7 +265,8 @@ fn impl_scaffolding_tags(ast: &syn::DeriveInput) -> TokenStream {
 }
 
 ///
-/// Modify functions
+/// Modifies the following functions
+/// + new - Adds the core attributes to the new struct using the defined or default values
 ///
 #[proc_macro_attribute]
 pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
