@@ -7,6 +7,7 @@ use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
 // use serde::Serialize;
 
+static ADDRESS: &str = "addresses";
 static METADATA: &str = "metadata";
 static NOTES: &str = "notes";
 static TAGS: &str = "tags";
@@ -19,8 +20,21 @@ static CORE_ATTRS: [&str; 6] = [
     "activity",
 ];
 
-///
 /// Modifying a struct
+///
+/// Dynammically adds the following public attributes to the struct
+/// + id: String
+/// + created_dtm: i64
+/// + modified_dtm: i64
+/// + inactive_dtm: i64
+/// + expired_dtm: i64
+/// + activity: Vec<ActivityItem>
+///
+/// Optionally
+/// + addresses: Vec<Address>
+/// + metadata: BTreeMap<String, String>
+/// + notes: BTreeMap<String, Note>
+/// + tags: Vec<String>
 ///
 #[proc_macro_attribute]
 pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -35,40 +49,53 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
         // The unique identifier of the object
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { id: String })
+                .parse2(quote! { pub id: String })
                 .unwrap(),
         );
         // The timestamp when the object was created
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { created_dtm: i64 })
+                .parse2(quote! { pub created_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object was last modified
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { modified_dtm: i64 })
+                .parse2(quote! { pub modified_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object is no longer active
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { inactive_dtm: i64 })
+                .parse2(quote! { pub inactive_dtm: i64 })
                 .unwrap(),
         );
         // The timestamp when the object is expired
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { expired_dtm: i64 })
+                .parse2(quote! { pub expired_dtm: i64 })
                 .unwrap(),
         );
 
         // The list of activity performed on the object
         fields.named.push(
             syn::Field::parse_named
-                .parse2(quote! { activity: Vec<ActivityItem> })
+                .parse2(quote! { pub activity: Vec<ActivityItem> })
                 .unwrap(),
         );
+
+        // optional attributes
+        match attrs.contains(&ADDRESS.to_string()) {
+            true => {
+                // The metadata handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { pub addresses: Vec<Address> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
 
         // optional attributes
         match attrs.contains(&METADATA.to_string()) {
@@ -76,7 +103,7 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 // The metadata handler
                 fields.named.push(
                     syn::Field::parse_named
-                        .parse2(quote! { metadata: BTreeMap<String, String> })
+                        .parse2(quote! { pub metadata: BTreeMap<String, String> })
                         .unwrap(),
                 );
             }
@@ -89,7 +116,7 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 // The notes handler
                 fields.named.push(
                     syn::Field::parse_named
-                        .parse2(quote! { notes: BTreeMap<String, Note> })
+                        .parse2(quote! { pub notes: BTreeMap<String, Note> })
                         .unwrap(),
                 );
             }
@@ -102,7 +129,7 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 // The tags handler
                 fields.named.push(
                     syn::Field::parse_named
-                        .parse2(quote! { tags: Vec<String> })
+                        .parse2(quote! { pub tags: Vec<String> })
                         .unwrap(),
                 );
             }
@@ -153,6 +180,54 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
 
             fn log_activity(&mut self, name: String, descr: String) {
                 self.activity.push(ActivityItem::new(name, descr));
+            }
+        }
+    };
+    gen.into()
+}
+
+// Addresses Trait
+#[proc_macro_derive(ScaffoldingAddresses)]
+pub fn scaffolding_addresses_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+
+    impl_scaffolding_addresses(&ast)
+}
+
+fn impl_scaffolding_addresses(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingAddresses for #name {
+            fn add_address(
+                &mut self,
+                category: String,
+                line_1: String,
+                line_2: String,
+                line_3: String,
+                line_4: String,
+                country_code: String,
+            ) -> Address {
+                let address = Address::new(category, line_1, line_2, line_3, line_4, country_code);
+                self.addresses.push(address.clone());
+                return address;
+            }
+
+            fn addresses_by_category(&self, category: String) -> Vec<&Address> {
+                self.addresses
+                    .iter()
+                    .filter(|a| a.category == category)
+                    .collect()
+            }
+
+            fn remove_address(&mut self, id: String) {
+                match self.addresses.iter().position(|a| a.id == id) {
+                    Some(idx) => {
+                        self.addresses.remove(idx);
+                    }
+                    None => {
+                        // do nothing
+                    }
+                }
             }
         }
     };
@@ -257,7 +332,8 @@ fn impl_scaffolding_tags(ast: &syn::DeriveInput) -> TokenStream {
 }
 
 ///
-/// Modify functions
+/// Modifies the following functions
+/// + new - Adds the core attributes to the new struct using the defined or default values
 ///
 #[proc_macro_attribute]
 pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
@@ -292,6 +368,13 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 "expired_dtm",
                                 "activity",
                             ];
+
+                            match attrs.contains(&ADDRESS.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&ADDRESS);
+                                }
+                                _ => {}
+                            }
 
                             match attrs.contains(&METADATA.to_string()) {
                                 true => {
@@ -374,6 +457,10 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                     }
                                     "tags" => {
                                         let line: FieldValue = parse_quote! {tags: Vec::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "addresses" => {
+                                        let line: FieldValue = parse_quote! {addresses: Vec::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     _ => {}
