@@ -86,7 +86,7 @@
 //! entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
 //! // (2) Get activities
 //! assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
-//! 
+//!
 //! /* use the addresses functionality */
 //! // (1) Add an address
 //! let addrShipping = entity.add_address(
@@ -117,7 +117,7 @@
 //! let shipping_addresses = entity.addresses_by_category("shipping".to_string());
 //! // (3) Remove an address
 //! entity.remove_address(addrBilling.id);
-//! 
+//!
 //! /* use the notes functionality */
 //! // (1) Insert a note
 //! let note_id = entity.insert_note(
