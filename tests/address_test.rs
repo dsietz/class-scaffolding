@@ -1,14 +1,27 @@
 extern crate scaffolding_core;
-// extern crate scaffolding_macros;
+extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
-    use scaffolding_core::entity::{Address, Countries, Country, Entity};
+    use scaffolding_core::*;
+    use scaffolding_macros::*;
+    use serde_derive::{Deserialize, Serialize};
+
+    #[scaffolding_struct("addresses")]
+    #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
+    struct MyEntity {}
+
+    impl MyEntity {
+        #[scaffolding_fn("addresses")]
+        fn new() -> Self {
+            Self {}
+        }
+    }
 
     #[test]
     fn test_address_new() {
-        let entity = Address::new(
+        let address = Address::new(
             "shipping".to_string(),
             "acmes company".to_string(),
             "14 Main Street".to_string(),
@@ -20,19 +33,11 @@ mod tests {
 
         // scaffolding attributes
         assert_eq!(
-            entity.id.len(),
+            address.id.len(),
             "54324f57-9e6b-4142-b68d-1d4c86572d0a".len()
         );
-        assert_eq!(entity.created_dtm, now);
-        assert_eq!(entity.modified_dtm, now);
-        assert_eq!((entity.inactive_dtm - entity.modified_dtm) / 86400, 90);
-        assert_eq!((entity.expired_dtm - entity.modified_dtm) / 86400, 1095);
-
-        // extended attributes
-        // assert_eq!(entity.b, true);
-
-        // extended behavior
-        // assert_eq!(entity.my_func(), "my function");
+        assert_eq!(address.created_dtm, now);
+        assert_eq!(address.modified_dtm, now);
     }
 
     #[test]
@@ -134,7 +139,7 @@ mod tests {
 
     #[test]
     fn test_entity_addresses() {
-        let mut entity = Entity::new();
+        let mut entity = MyEntity::new();
 
         assert_eq!(entity.addresses.len(), 0);
 
