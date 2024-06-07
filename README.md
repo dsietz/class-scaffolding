@@ -24,8 +24,8 @@ For software development teams who appreciate a kick-start to their object orien
 | ----------------------------------------------------------------------------- |
 | This crate is in an `beta` release phase and is only intended as experimental.|
 
-**0.4.0**
-+ [Provide the ability to manage notes](https://github.com/dsietz/scaffolding-core/issues/29)
+**0.5.0**
++ [Provide the ability to manage addresses](https://github.com/dsietz/scaffolding-core/issues/32)
 
 ## Usage
 Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
@@ -33,15 +33,15 @@ Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
 ```rust
 extern crate scaffolding_core;
 
-use scaffolding_core::{defaults, ActivityItem, Note, Scaffolding, ScaffoldingNotes, ScaffoldingTags};
+use scaffolding_core::*;
 use scaffolding_macros::*;
 use serde_derive::{Deserialize, Serialize};
 // Required for scaffolding metadata functionality
 use std::collections::BTreeMap;
 
 // (1) Define the structure - Required
-#[scaffolding_struct("metadata","notes","tags")]
-#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingNotes, ScaffoldingTags)]
+#[scaffolding_struct("addresses","metadata","notes","tags")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses, ScaffoldingNotes, ScaffoldingTags)]
 struct MyEntity {
     a: bool,
     b: String,
@@ -52,7 +52,7 @@ impl MyEntity {
     //     Note: Any of the Scaffodling attributes that are set here 
     //           will not be overwritten when generated. For example
     //           the `id` attribute, if uncommented, would be ignored.
-    #[scaffolding_fn("metadata","notes","tags")]
+    #[scaffolding_fn("addresses","metadata","notes","tags")]
     fn new(arg: bool) -> Self {
         let msg = format!("You said it is {}", arg);
         Self {
@@ -83,6 +83,37 @@ assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
 entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
 // (2) Get activities
 assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
+
+/* use the addresses functionality */
+// (1) Add an address
+let addrShipping = entity.add_address(
+    "shipping".to_string(),
+    "acmes company".to_string(),
+    "14 Main Street".to_string(),
+    "Big City, NY 038845".to_string(),
+    "USA".to_string(),
+    "USA".to_string(),
+);
+let addrBilling = entity.add_address(
+    "billing".to_string(),
+    "acmes company".to_string(),
+    "14 Main Street".to_string(),
+    "Big City, NY 038845".to_string(),
+    "USA".to_string(),
+    "USA".to_string(),
+
+let addrHome = entity.add_address(
+    "home".to_string(),
+    "Peter Petty".to_string(),
+    "23 Corner Lane".to_string(),
+    "Tiny Town, VT 044567".to_string(),
+    "USA".to_string(),
+    "USA".to_string(),
+);
+// (2) Find addresses based on the category
+let shipping_addresses = entity.addresses_by_category("shipping".to_string());
+// (3) Remove an address
+entity.remove_address(addrBilling.id);
 
 /* use the notes functionality */
 // (1) Insert a note
