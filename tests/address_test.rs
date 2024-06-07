@@ -161,7 +161,7 @@ mod tests {
             "USA".to_string(),
         );
 
-        let addr3 = entity.add_address(
+        let _ = entity.add_address(
             "home".to_string(),
             "Peter Petty".to_string(),
             "23 Corner Lane".to_string(),
@@ -170,7 +170,7 @@ mod tests {
             "USA".to_string(),
         );
 
-        let addr4 = entity.add_address(
+        let _ = entity.add_address(
             "shipping".to_string(),
             "neighbor house".to_string(),
             "24 Corner Lane".to_string(),
