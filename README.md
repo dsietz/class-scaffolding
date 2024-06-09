@@ -13,6 +13,7 @@ For software development teams who appreciate a kick-start to their object orien
 - [Scaffolding Core](#scaffolding-core)
     - [Table of Contents](#table-of-contents)
   - [What's New](#whats-new)
+  - [Examples](#examples)
   - [Usage](#usage)
   - [How to Contribute](#how-to-contribute)
   - [License](#license)
@@ -26,6 +27,11 @@ For software development teams who appreciate a kick-start to their object orien
 
 **0.5.0**
 + [Provide the ability to manage addresses](https://github.com/dsietz/scaffolding-core/issues/32)
+
+## Examples
+```rust
+cargo run --example person
+```
 
 ## Usage
 Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
