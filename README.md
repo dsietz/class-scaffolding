@@ -25,8 +25,9 @@ For software development teams who appreciate a kick-start to their object orien
 | ----------------------------------------------------------------------------- |
 | This crate is in an `beta` release phase and is only intended as experimental.|
 
-**0.5.0**
-+ [Provide the ability to manage addresses](https://github.com/dsietz/scaffolding-core/issues/32)
+**0.6.0**
++ [Provide the ability to manage phone numbers](https://github.com/dsietz/scaffolding-core/issues/36)
++ [Provide the ability to manage email addresses](https://github.com/dsietz/scaffolding-core/issues/37)
 
 ## Examples
 ```rust
@@ -120,6 +121,23 @@ let addrHome = entity.add_address(
 let shipping_addresses = entity.addresses_by_category("shipping".to_string());
 // (3) Remove an address
 entity.remove_address(addrBilling.id);
+
+/* use the phone number functionality */
+// (1) Add a phone number
+let phoneHome = entity.add_phone_number(
+    "home".to_string(),
+    "8482493561".to_string(),
+    "USA".to_string(),
+);
+let phoneWork = entity.add_phone_number(
+    "work".to_string(),
+    "2223330000".to_string(),
+    "USA".to_string(),
+);
+// (2) Find phone number based on the category
+let home_phone = entity.phone_numbers_by_category("home".to_string());
+// (3) Remove an address
+entity.remove_phone_number(phoneWork.id);
 
 /* use the notes functionality */
 // (1) Insert a note

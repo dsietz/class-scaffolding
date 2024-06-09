@@ -5,10 +5,10 @@ use syn::Expr::Struct;
 use syn::FieldValue;
 use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
-// use serde::Serialize;
 
 static ADDRESS: &str = "addresses";
 static METADATA: &str = "metadata";
+static PHONE: &str = "phone_numbers";
 static NOTES: &str = "notes";
 static TAGS: &str = "tags";
 static CORE_ATTRS: [&str; 6] = [
@@ -31,9 +31,10 @@ static CORE_ATTRS: [&str; 6] = [
 /// + activity: Vec<ActivityItem>
 ///
 /// Optionally
-/// + addresses: Vec<Address>
+/// + addresses: BTreeMap<String, Address>
 /// + metadata: BTreeMap<String, String>
 /// + notes: BTreeMap<String, Note>
+/// + phone_numbers: BTreeMap<String, PhoneNumber>
 /// + tags: Vec<String>
 ///
 #[proc_macro_attribute]
@@ -87,10 +88,10 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
         // optional attributes
         match attrs.contains(&ADDRESS.to_string()) {
             true => {
-                // The metadata handler
+                // The address handler
                 fields.named.push(
                     syn::Field::parse_named
-                        .parse2(quote! { pub addresses: Vec<Address> })
+                        .parse2(quote! { pub addresses: BTreeMap<String, Address> })
                         .unwrap(),
                 );
             }
@@ -117,6 +118,18 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 fields.named.push(
                     syn::Field::parse_named
                         .parse2(quote! { pub notes: BTreeMap<String, Note> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
+
+        match attrs.contains(&PHONE.to_string()) {
+            true => {
+                // The phonenumber handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { pub phone_numbers: BTreeMap<String, PhoneNumber> })
                         .unwrap(),
                 );
             }
@@ -198,7 +211,11 @@ fn impl_scaffolding_addresses(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl ScaffoldingAddresses for #name {
-            fn add_address(
+            fn get_address(&self, id: String) -> Option<&Address> {
+                self.addresses.get(&id)
+            }
+
+            fn insert_address(
                 &mut self,
                 category: String,
                 line_1: String,
@@ -206,28 +223,31 @@ fn impl_scaffolding_addresses(ast: &syn::DeriveInput) -> TokenStream {
                 line_3: String,
                 line_4: String,
                 country_code: String,
-            ) -> Address {
+            ) -> String {
                 let address = Address::new(category, line_1, line_2, line_3, line_4, country_code);
-                self.addresses.push(address.clone());
-                return address;
+                let id = address.id.clone();
+                self.addresses.insert(id.clone(), address);
+                id
             }
 
-            fn addresses_by_category(&self, category: String) -> Vec<&Address> {
+            fn modify_address(&mut self, id: String, category: String, line_1: String, line_2: String, line_3: String, line_4: String, country_code: String) {
+                self.addresses
+                .entry(id)
+                .and_modify(|addr|
+                    addr.update(category, line_1, line_2, line_3, line_4, country_code)
+                );
+            }
+
+            fn search_addresses_by_category(&self, category: String) -> Vec<Address> {
                 self.addresses
                     .iter()
-                    .filter(|a| a.category == category)
+                    .filter(|(k,v)| v.category == category)
+                    .map(|(k,v)| v.clone())
                     .collect()
             }
 
             fn remove_address(&mut self, id: String) {
-                match self.addresses.iter().position(|a| a.id == id) {
-                    Some(idx) => {
-                        self.addresses.remove(idx);
-                    }
-                    None => {
-                        // do nothing
-                    }
-                }
+                self.addresses.remove(&id);
             }
         }
     };
@@ -286,6 +306,50 @@ fn impl_scaffolding_notes(ast: &syn::DeriveInput) -> TokenStream {
 
             fn remove_note(&mut self, id: String) {
                 self.notes.remove(&id);
+            }
+        }
+    };
+    gen.into()
+}
+
+// PhoneNumber Trait
+#[proc_macro_derive(ScaffoldingPhoneNumbers)]
+pub fn scaffolding_phonenumbers_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+
+    impl_scaffolding_phonenumbers(&ast)
+}
+
+fn impl_scaffolding_phonenumbers(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingPhoneNumbers for #name {
+            fn get_phone_number(&self, id: String) -> Option<&PhoneNumber> {
+                self.phone_numbers.get(&id)
+            }
+
+            fn insert_phone_number(
+                &mut self,
+                category: String,
+                number: String,
+                country_code: String,
+            ) -> String {
+                let phone = PhoneNumber::new(category, number, country_code);
+                let id = phone.id.clone();
+                self.phone_numbers.insert(id.clone(), phone);
+                id
+            }
+
+            fn search_phone_numbers_by_category(&self, category: String) -> Vec<PhoneNumber> {
+                self.phone_numbers
+                    .iter()
+                    .filter(|(k,v)| v.category == category)
+                    .map(|(k,v)| v.clone())
+                    .collect()
+            }
+
+            fn remove_phone_number(&mut self, id: String) {
+                self.phone_numbers.remove(&id);
             }
         }
     };
@@ -390,6 +454,13 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 _ => {}
                             }
 
+                            match attrs.contains(&PHONE.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&PHONE);
+                                }
+                                _ => {}
+                            }
+
                             match attrs.contains(&TAGS.to_string()) {
                                 true => {
                                     modify_attr_list.push(&TAGS);
@@ -460,7 +531,13 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "addresses" => {
-                                        let line: FieldValue = parse_quote! {addresses: Vec::new()};
+                                        let line: FieldValue =
+                                            parse_quote! {addresses: BTreeMap::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "phone_numbers" => {
+                                        let line: FieldValue =
+                                            parse_quote! {phone_numbers: BTreeMap::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     _ => {}
