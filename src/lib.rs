@@ -89,7 +89,7 @@
 //!
 //! /* use the addresses functionality */
 //! // (1) Add an address
-//! let addrShipping = entity.add_address(
+//! let addrShippingId = entity.insert_address(
 //!     "shipping".to_string(),
 //!     "acmes company".to_string(),
 //!     "14 Main Street".to_string(),
@@ -97,7 +97,7 @@
 //!     "USA".to_string(),
 //!     "USA".to_string(),
 //! );
-//! let addrBilling = entity.add_address(
+//! let addrBillingId = entity.insert_address(
 //!     "billing".to_string(),
 //!     "acmes company".to_string(),
 //!     "14 Main Street".to_string(),
@@ -105,7 +105,7 @@
 //!     "USA".to_string(),
 //!     "USA".to_string(),
 //! );
-//! let addrHome = entity.add_address(
+//! let addrHomeId = entity.insert_address(
 //!     "home".to_string(),
 //!     "Peter Petty".to_string(),
 //!     "23 Corner Lane".to_string(),
@@ -114,9 +114,9 @@
 //!     "USA".to_string(),
 //! );
 //! // (2) Find addresses based on the category
-//! let shipping_addresses = entity.addresses_by_category("shipping".to_string());
+//! let shipping_addresses = entity.search_addresses_by_category("shipping".to_string());
 //! // (3) Remove an address
-//! entity.remove_address(addrBilling.id);
+//! entity.remove_address(addrBillingId);
 //!
 //! /* use the notes functionality */
 //! // (1) Insert a note
@@ -374,9 +374,55 @@ impl Address {
     pub fn serialize(&mut self) -> String {
         serde_json::to_string(&self).unwrap()
     }
+
+    /// This function updates the Address.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::{defaults, Address};
+    /// use serde_derive::{Serialize};
+    ///
+    /// let mut address = Address::new(
+    ///   "shipping".to_string(),
+    ///   "acmes company".to_string(),
+    ///   "14 Main Street".to_string(),
+    ///   "Big City, NY 038845".to_string(),
+    ///   "USA".to_string(),
+    ///   "USA".to_string()
+    /// );
+    ///
+    /// address.update(
+    ///   "billing".to_string(),
+    ///   "acmes company".to_string(),
+    ///   "14 Main Street".to_string(),
+    ///   "Big City, NY 038845".to_string(),
+    ///   "USA".to_string(),
+    ///   "USA".to_string());
+    ///
+    /// assert_eq!(address.category, "billing".to_string());
+    /// ```
+    pub fn update(
+        &mut self,
+        category: String,
+        line_1: String,
+        line_2: String,
+        line_3: String,
+        line_4: String,
+        country_code: String,
+    ) {
+        self.category = category;
+        self.line_1 = line_1;
+        self.line_2 = line_2;
+        self.line_3 = line_3;
+        self.line_4 = line_4;
+        self.country_code = country_code;
+        self.modified_dtm = defaults::now();
+    }
 }
 
 pub struct Countries {
+    // The list of countries
     pub list: Vec<Country>,
 }
 
@@ -703,6 +749,108 @@ impl Note {
     }
 }
 
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct PhoneNumber {
+    // The unique identifier of the note
+    pub id: String,
+    // The timestamp when the note was created
+    pub created_dtm: i64,
+    // The timestamp when the note was last modified
+    pub modified_dtm: i64,
+    // The type of address, (e.g.: Billing, Shipping, Home, Work, etc.)
+    pub category: String,
+    // The phone number
+    pub number: String,
+    // The country code of the phone number (Use Alpha 3 codes)
+    pub country_code: String,
+}
+
+impl PhoneNumber {
+    /// This is the constructor function.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::PhoneNumber;
+    ///
+    /// fn main() {
+    ///   let phone = PhoneNumber::new(
+    ///       "home".to_string(),
+    ///       "8482493561".to_string(),
+    ///       "USA".to_string(),
+    ///   );
+    ///   
+    ///   // scaffolding attributes
+    ///   println!("{}", phone.id);
+    ///   println!("{}", phone.created_dtm);
+    ///   println!("{}", phone.modified_dtm,);
+    /// }
+    /// ```
+    pub fn new(category: String, number: String, country_code: String) -> Self {
+        Self {
+            id: defaults::id(),
+            created_dtm: defaults::now(),
+            modified_dtm: defaults::now(),
+            category: category,
+            number: number,
+            country_code: country_code,
+        }
+    }
+
+    /// This function instantiates a PhoneNumber from a JSON string.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::PhoneNumber;
+    /// use serde_derive::Deserialize;
+    ///
+    /// let serialized = r#"{
+    ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
+    ///   "created_dtm":1711833619,
+    ///   "modified_dtm":1711833619,
+    ///   "category":"home",
+    ///   "number":"8482493561",
+    ///   "country_code": "USA"
+    /// }"#;
+    /// let mut phone = PhoneNumber::deserialized(&serialized.as_bytes()).unwrap();
+    ///
+    /// assert_eq!(phone.created_dtm, 1711833619);
+    /// assert_eq!(phone.modified_dtm, 1711833619);
+    /// assert_eq!(phone.category, "home".to_string());
+    /// ```
+    pub fn deserialized(serialized: &[u8]) -> Result<PhoneNumber, DeserializeError> {
+        match serde_json::from_slice(&serialized) {
+            Ok(item) => Ok(item),
+            Err(err) => {
+                println!("{}", err);
+                Err(DeserializeError)
+            }
+        }
+    }
+
+    /// This function converts the PhoneNumber to a serialize JSON string.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::{defaults, PhoneNumber};
+    /// use serde_derive::{Serialize};
+    ///
+    /// let mut phone = PhoneNumber::new(
+    ///       "home".to_string(),
+    ///       "8482493561".to_string(),
+    ///       "USA".to_string(),
+    /// );
+    /// println!("{}", phone.serialize());
+    /// ```
+    pub fn serialize(&mut self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+}
+
 /// The core behavior of a Scaffolding object
 pub trait Scaffolding {
     /// This function adds a ActivityItem to the activity log
@@ -861,7 +1009,7 @@ pub trait Scaffolding {
 
 /// The addresses behavior of a Scaffolding object
 pub trait ScaffoldingAddresses {
-    /// Adds a related Address to the Entity and returns the Address for reference.
+    /// Retrieves a related Address to the Entity based on the specified id.
     ///
     /// #Example
     ///
@@ -871,6 +1019,7 @@ pub trait ScaffoldingAddresses {
     /// use scaffolding_core::*;
     /// use scaffolding_macros::*;
     /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -884,7 +1033,44 @@ pub trait ScaffoldingAddresses {
     /// }
     ///
     /// let mut entity = MyEntity::new();
-    /// let _ = entity.add_address(
+    /// let id = entity.insert_address(
+    ///     "shipping".to_string(),
+    ///     "acmes company".to_string(),
+    ///     "14 Main Street".to_string(),
+    ///     "Big City, NY 038845".to_string(),
+    ///     "USA".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.get_address(id).unwrap().category, "shipping".to_string());
+    /// ```    
+    fn get_address(&self, id: String) -> Option<&Address>;
+
+    /// Insert or updates a related Address to the Entity and returns the id of the Address.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let _ = entity.insert_address(
     ///     "shipping".to_string(),
     ///     "acmes company".to_string(),
     ///     "14 Main Street".to_string(),
@@ -895,7 +1081,7 @@ pub trait ScaffoldingAddresses {
     ///
     /// assert_eq!(entity.addresses.len(), 1);
     /// ```
-    fn add_address(
+    fn insert_address(
         &mut self,
         category: String,
         line_1: String,
@@ -903,7 +1089,62 @@ pub trait ScaffoldingAddresses {
         line_3: String,
         line_4: String,
         country_code: String,
-    ) -> Address;
+    ) -> String;
+
+    /// Insert or updates a related Address to the Entity and returns the id of the Address for reference.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_address(
+    ///     "shipping".to_string(),
+    ///     "acmes company".to_string(),
+    ///     "14 Main Street".to_string(),
+    ///     "Big City, NY 038845".to_string(),
+    ///     "USA".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    ///
+    /// entity.modify_address(
+    ///     id.clone(),
+    ///     "billing".to_string(),
+    ///     "acmes company".to_string(),
+    ///     "14 Main Street".to_string(),
+    ///     "Big City, NY 038845".to_string(),
+    ///     "USA".to_string(),
+    ///     "USA".to_string(),);
+    ///
+    /// assert_eq!(entity.get_address(id).unwrap().category, "billing".to_string());
+    /// ```
+    fn modify_address(
+        &mut self,
+        id: String,
+        category: String,
+        line_1: String,
+        line_2: String,
+        line_3: String,
+        line_4: String,
+        country_code: String,
+    );
 
     /// Retrieves all the Addresses with the specified category.
     ///
@@ -915,6 +1156,7 @@ pub trait ScaffoldingAddresses {
     /// use scaffolding_core::*;
     /// use scaffolding_macros::*;
     /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -928,7 +1170,7 @@ pub trait ScaffoldingAddresses {
     /// }
     ///
     /// let mut entity = MyEntity::new();
-    /// let address = entity.add_address(
+    /// let address = entity.insert_address(
     ///     "shipping".to_string(),
     ///     "acmes company".to_string(),
     ///     "14 Main Street".to_string(),
@@ -937,11 +1179,11 @@ pub trait ScaffoldingAddresses {
     ///     "USA".to_string(),
     /// );
     ///
-    /// assert_eq!(entity.addresses_by_category("shipping".to_string()).len(), 1);
+    /// assert_eq!(entity.search_addresses_by_category("shipping".to_string()).len(), 1);
     /// ```
-    fn addresses_by_category(&self, category: String) -> Vec<&Address>;
+    fn search_addresses_by_category(&self, category: String) -> Vec<Address>;
 
-    /// Adds a related Address to the Entity and returns the Address for reference.
+    /// Removes a related Address to the Entity.
     ///
     /// #Example
     ///
@@ -951,6 +1193,7 @@ pub trait ScaffoldingAddresses {
     /// use scaffolding_core::*;
     /// use scaffolding_macros::*;
     /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -964,7 +1207,7 @@ pub trait ScaffoldingAddresses {
     /// }
     ///
     /// let mut entity = MyEntity::new();
-    /// let address = entity.add_address(
+    /// let id = entity.insert_address(
     ///     "shipping".to_string(),
     ///     "acmes company".to_string(),
     ///     "14 Main Street".to_string(),
@@ -974,7 +1217,7 @@ pub trait ScaffoldingAddresses {
     /// );
     /// assert_eq!(entity.addresses.len(), 1);
     ///
-    /// entity.remove_address(address.id);
+    /// entity.remove_address(id);
     /// assert_eq!(entity.addresses.len(), 0);
     /// ```
     fn remove_address(&mut self, id: String);
@@ -982,12 +1225,354 @@ pub trait ScaffoldingAddresses {
 
 /// The notes behavior of a Scaffolding object
 pub trait ScaffoldingNotes {
+    /// Retrieves a related Note based on the specific id.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("notes")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("notes")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "This was updated".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    ///
+    /// assert_eq!(entity.get_note(id).unwrap().content_as_string().unwrap(), "This was updated".to_string());
+    /// ```
     fn get_note(&self, id: String) -> Option<&Note>;
+
+    /// Inserts a related Note.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("notes")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("notes")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "This was updated".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    ///
+    /// assert_eq!(entity.notes.len(), 1);
+    /// ```
     fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String;
+
+    /// Updates a related Note based on the specified id.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("notes")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("notes")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "This was updated".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    ///
+    /// entity.modify_note(
+    ///     id.clone(),
+    ///     "fsmith".to_string(),
+    ///     "This was updated again".as_bytes().to_vec(),
+    ///     Some("private".to_string()),
+    /// );
+    /// ```
     fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>);
+
+    /// Searches the notes for specific string and returns all the notes that were found.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("notes")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("notes")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// let _ = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "This was updated".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    /// let _ = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "Something to find here".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    /// let _ = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "Nonething to find here".as_bytes().to_vec(),
+    ///     Some("private".to_string()),
+    /// );
+    ///  
+    /// let search_results = entity.search_notes("thing".to_string());
+    ///
+    /// assert_eq!(search_results.len(), 2);
+    /// ```
     fn search_notes(&mut self, search: String) -> Vec<Note>;
+
+    /// Removes a note for specific id.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("notes")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("notes")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    ///
+    /// let _ = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "This was updated".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    /// let id = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "Something to find here".as_bytes().to_vec(),
+    ///     None,
+    /// );
+    /// let _ = entity.insert_note(
+    ///     "fsmith".to_string(),
+    ///     "Nonething to find here".as_bytes().to_vec(),
+    ///     Some("private".to_string()),
+    /// );
+    ///  
+    /// entity.remove_note(id);
+    ///
+    /// assert_eq!(entity.notes.len(), 2);
+    /// ```
     fn remove_note(&mut self, id: String);
 }
+
+/// The phone number behavior of a Scaffolding object
+pub trait ScaffoldingPhoneNumbers {
+    /// Retrieves a related PhoneNumber based on the specific id.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("phone_numbers")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("phone_numbers")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_phone_number(
+    ///     "home".to_string(),
+    ///     "8482493561".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.get_phone_number(id).unwrap().number, "8482493561".to_string());
+    /// ```
+    fn get_phone_number(&self, id: String) -> Option<&PhoneNumber>;
+
+    /// Adds a related PhoneNumber to the Entity and returns the id for reference.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("phone_numbers")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("phone_numbers")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let _ = entity.insert_phone_number(
+    ///     "home".to_string(),
+    ///     "8482493561".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.phone_numbers.len(), 1);
+    /// ```
+    fn insert_phone_number(
+        &mut self,
+        category: String,
+        number: String,
+        country_code: String,
+    ) -> String;
+
+    /// Retrieves all the PhoneNumber with the specified category.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("phone_numbers")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("phone_numbers")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let _ = entity.insert_phone_number(
+    ///     "home".to_string(),
+    ///     "8482493561".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.search_phone_numbers_by_category("home".to_string()).len(), 1);
+    /// ```
+    fn search_phone_numbers_by_category(&self, category: String) -> Vec<PhoneNumber>;
+
+    /// Removes a related PhoneNumber to the Entity.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("phone_numbers")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("phone_numbers")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_phone_number(
+    ///     "home".to_string(),
+    ///     "8482493561".to_string(),
+    ///     "USA".to_string(),
+    /// );
+    /// assert_eq!(entity.phone_numbers.len(), 1);
+    ///
+    /// entity.remove_phone_number(id);
+    /// assert_eq!(entity.phone_numbers.len(), 0);
+    /// ```
+    fn remove_phone_number(&mut self, id: String);
+}
+
 /// The tagging behavior of a Scaffolding object
 pub trait ScaffoldingTags {
     /// This function adds a tag to the object
