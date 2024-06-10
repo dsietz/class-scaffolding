@@ -15,6 +15,11 @@ For software development teams who appreciate a kick-start to their object orien
   - [What's New](#whats-new)
   - [Examples](#examples)
   - [Usage](#usage)
+      - [Addresses](#addresses)
+      - [Metadata](#metadata)
+      - [Notes](#notes)
+      - [Phone Numbers](#phone-numbers)
+      - [Tagging](#tagging)
   - [How to Contribute](#how-to-contribute)
   - [License](#license)
 
@@ -27,7 +32,6 @@ For software development teams who appreciate a kick-start to their object orien
 
 **0.6.0**
 + [Provide the ability to manage phone numbers](https://github.com/dsietz/scaffolding-core/issues/36)
-+ [Provide the ability to manage email addresses](https://github.com/dsietz/scaffolding-core/issues/37)
 
 ## Examples
 ```rust
@@ -35,31 +39,35 @@ cargo run --example person
 ```
 
 ## Usage
-Add Scaffolding to a `struct` and `impl` `::new()` using macros and defaults
 
+(1) Import the necessary modules
 ```rust
 extern crate scaffolding_core;
 
 use scaffolding_core::*;
 use scaffolding_macros::*;
 use serde_derive::{Deserialize, Serialize};
-// Required for scaffolding metadata functionality
+// Required for scaffolding extended functionality (e.g.: addresses, metadata, notes, phonenumbers)
 use std::collections::BTreeMap;
-
-// (1) Define the structure - Required
-#[scaffolding_struct("addresses","metadata","notes","tags")]
-#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses, ScaffoldingNotes, ScaffoldingTags)]
+```
+(2) Add Scaffolding attributes and apply the trait to a `struct` 
+```rust
+#[scaffolding_struct]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding)]
 struct MyEntity {
     a: bool,
     b: String,
 }
-
+```
+(3) Dynamically add the default values for the Scaffodling attributes as part of the `impl` `::new()` constructor
+_NOTE:_ The `scaffolding_core::defaults` module is available if you wish to use it else where
+```rust
 impl MyEntity {
-    // (2) Define the constructor - Optional
-    //     Note: Any of the Scaffodling attributes that are set here 
-    //           will not be overwritten when generated. For example
-    //           the `id` attribute, if uncommented, would be ignored.
-    #[scaffolding_fn("addresses","metadata","notes","tags")]
+    // Define the constructor - Optional
+    // Note: Any of the Scaffolding attributes that are set here 
+    //       will not be overwritten when generated. For example
+    //       the `id` attribute, if uncommented, would be ignored.
+    #[scaffolding_fn]
     fn new(arg: bool) -> Self {
         let msg = format!("You said it is {}", arg);
         Self {
@@ -73,7 +81,9 @@ impl MyEntity {
         "my function".to_string()
     }
 }
-
+```
+(4) Use the Scaffolding attributes and behavior
+```rust
 let mut entity = MyEntity::new(true);
 
 /* scaffolding attributes */
@@ -91,6 +101,30 @@ entity.log_activity("cancelled".to_string(), "The customer has cancelled their s
 // (2) Get activities
 assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
 
+/* custom attributes */
+assert_eq!(entity.a, true);
+assert_eq!(entity.b, "You said it is true");
+
+/* custom behavior */
+assert_eq!(entity.my_func(), "my function");
+```
+---
+There are additional Scaffolding features that can be applied.
+#### Addresses
+```rust
+#[scaffolding_struct("addresses")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
+struct MyEntity {}
+
+impl MyEntity {
+    #[scaffolding_fn("addresses")]
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+let mut entity = MyEntity::new();
+
 /* use the addresses functionality */
 // (1) Add an address
 let addrShipping = entity.add_address(
@@ -101,45 +135,48 @@ let addrShipping = entity.add_address(
     "USA".to_string(),
     "USA".to_string(),
 );
-let addrBilling = entity.add_address(
-    "billing".to_string(),
-    "acmes company".to_string(),
-    "14 Main Street".to_string(),
-    "Big City, NY 038845".to_string(),
-    "USA".to_string(),
-    "USA".to_string(),
-
-let addrHome = entity.add_address(
-    "home".to_string(),
-    "Peter Petty".to_string(),
-    "23 Corner Lane".to_string(),
-    "Tiny Town, VT 044567".to_string(),
-    "USA".to_string(),
-    "USA".to_string(),
-);
 // (2) Find addresses based on the category
 let shipping_addresses = entity.addresses_by_category("shipping".to_string());
 // (3) Remove an address
 entity.remove_address(addrBilling.id);
+```
+#### Metadata
+```rust
+#[scaffolding_struct("metadata")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding)]
+struct MyEntity {}
 
-/* use the phone number functionality */
-// (1) Add a phone number
-let phoneHome = entity.add_phone_number(
-    "home".to_string(),
-    "8482493561".to_string(),
-    "USA".to_string(),
-);
-let phoneWork = entity.add_phone_number(
-    "work".to_string(),
-    "2223330000".to_string(),
-    "USA".to_string(),
-);
-// (2) Find phone number based on the category
-let home_phone = entity.phone_numbers_by_category("home".to_string());
-// (3) Remove an address
-entity.remove_phone_number(phoneWork.id);
+impl MyEntity {
+    #[scaffolding_fn("metadata")]
+    fn new() -> Self {
+        Self {}
+    }
+}
 
-/* use the notes functionality */
+let mut entity = MyEntity::new();
+
+/* use the metadata functionality
+   Note: `memtadata` is a BTreeMap<String, String>
+          https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
+*/
+entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
+assert_eq!(entity.metadata.len(), 1);
+```
+#### Notes
+```rust
+#[scaffolding_struct("notes")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
+struct MyEntity {}
+
+impl MyEntity {
+    #[scaffolding_fn("notes")]
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+let mut entity = MyEntity::new();
+
 // (1) Insert a note
 let note_id = entity.insert_note(
   "fsmith".to_string(),
@@ -161,13 +198,53 @@ let search_results = entity.search_notes("updated".to_string());
 assert_eq!(search_results.len(), 1);
 // (5) Delete the note
 entity.remove_note(note_id);
+```
+#### Phone Numbers
+```rust
+#[scaffolding_struct("phone_numbers")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
+struct MyEntity {}
 
-/* use the metadata functionality
-   Note: `memtadata` is a BTreeMap<String, String>
-          https://doc.rust-lang.org/std/collections/struct.BTreeMap.html
-*/
-entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
-assert_eq!(entity.metadata.len(), 1);
+impl MyEntity {
+    #[scaffolding_fn("phone_numbers")]
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+let mut entity = MyEntity::new();
+
+/* use the phone number functionality */
+// (1) Add a phone number
+let phoneHome = entity.add_phone_number(
+    "home".to_string(),
+    "8482493561".to_string(),
+    "USA".to_string(),
+);
+let phoneWork = entity.add_phone_number(
+    "work".to_string(),
+    "2223330000".to_string(),
+    "USA".to_string(),
+);
+// (2) Find phone number based on the category
+let home_phone = entity.phone_numbers_by_category("home".to_string());
+// (3) Remove an address
+entity.remove_phone_number(phoneWork.id);
+```
+#### Tagging
+```rust
+#[scaffolding_struct("tags")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]
+struct MyEntity {}
+
+impl MyEntity {
+    #[scaffolding_fn("tags")]
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+let mut entity = MyEntity::new();
 
 // manage tags
 entity.add_tag("tag_1".to_string());
@@ -176,13 +253,6 @@ entity.add_tag("tag_3".to_string());
 assert!(entity.has_tag("tag_1".to_string()));
 entity.remove_tag("tag_2".to_string());
 assert_eq!(entity.tags.len(), 2);
-
-/* extended attributes */
-assert_eq!(entity.a, true);
-assert_eq!(entity.b, "You said it is true");
-
-/* extended behavior */
-assert_eq!(entity.my_func(), "my function");
 ```
 
 ## How to Contribute
