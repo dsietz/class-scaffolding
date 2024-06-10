@@ -1258,7 +1258,7 @@ pub trait ScaffoldingNotes {
     /// assert_eq!(entity.get_note(id).unwrap().content_as_string().unwrap(), "This was updated".to_string());
     /// ```
     fn get_note(&self, id: String) -> Option<&Note>;
-    
+
     /// Inserts a related Note.
     ///
     /// #Example
@@ -1292,7 +1292,7 @@ pub trait ScaffoldingNotes {
     /// assert_eq!(entity.notes.len(), 1);
     /// ```
     fn insert_note(&mut self, auth: String, cont: Vec<u8>, acc: Option<String>) -> String;
-    
+
     /// Updates a related Note based on the specified id.
     ///
     /// #Example
@@ -1322,7 +1322,7 @@ pub trait ScaffoldingNotes {
     ///     "This was updated".as_bytes().to_vec(),
     ///     None,
     /// );
-    /// 
+    ///
     /// entity.modify_note(
     ///     id.clone(),
     ///     "fsmith".to_string(),
@@ -1331,7 +1331,7 @@ pub trait ScaffoldingNotes {
     /// );
     /// ```
     fn modify_note(&mut self, id: String, auth: String, cont: Vec<u8>, acc: Option<String>);
-    
+
     /// Searches the notes for specific string and returns all the notes that were found.
     ///
     /// #Example
@@ -1356,7 +1356,7 @@ pub trait ScaffoldingNotes {
     /// }
     ///
     /// let mut entity = MyEntity::new();
-    /// 
+    ///
     /// let _ = entity.insert_note(
     ///     "fsmith".to_string(),
     ///     "This was updated".as_bytes().to_vec(),
@@ -1374,11 +1374,11 @@ pub trait ScaffoldingNotes {
     /// );
     ///  
     /// let search_results = entity.search_notes("thing".to_string());
-    /// 
+    ///
     /// assert_eq!(search_results.len(), 2);
     /// ```
     fn search_notes(&mut self, search: String) -> Vec<Note>;
-    
+
     /// Removes a note for specific id.
     ///
     /// #Example
@@ -1403,7 +1403,7 @@ pub trait ScaffoldingNotes {
     /// }
     ///
     /// let mut entity = MyEntity::new();
-    /// 
+    ///
     /// let _ = entity.insert_note(
     ///     "fsmith".to_string(),
     ///     "This was updated".as_bytes().to_vec(),
@@ -1421,7 +1421,7 @@ pub trait ScaffoldingNotes {
     /// );
     ///  
     /// entity.remove_note(id);
-    /// 
+    ///
     /// assert_eq!(entity.notes.len(), 2);
     /// ```
     fn remove_note(&mut self, id: String);
@@ -1462,7 +1462,7 @@ pub trait ScaffoldingPhoneNumbers {
     /// assert_eq!(entity.get_phone_number(id).unwrap().number, "8482493561".to_string());
     /// ```
     fn get_phone_number(&self, id: String) -> Option<&PhoneNumber>;
-    
+
     /// Adds a related PhoneNumber to the Entity and returns the id for reference.
     ///
     /// #Example
