@@ -13,9 +13,9 @@ For software development teams who appreciate a kick-start to their object orien
 - [Scaffolding Core](#scaffolding-core)
     - [Table of Contents](#table-of-contents)
   - [What's New](#whats-new)
-  - [Examples](#examples)
   - [Usage](#usage)
       - [Addresses](#addresses)
+      - [Email Addresses](#email-addresses)
       - [Metadata](#metadata)
       - [Notes](#notes)
       - [Phone Numbers](#phone-numbers)
@@ -30,13 +30,8 @@ For software development teams who appreciate a kick-start to their object orien
 | ----------------------------------------------------------------------------- |
 | This crate is in an `beta` release phase and is only intended as experimental.|
 
-**0.6.0**
-+ [Provide the ability to manage phone numbers](https://github.com/dsietz/scaffolding-core/issues/36)
-
-## Examples
-```rust
-cargo run --example person
-```
+**0.7.0**
++ [Provide the ability to manage email addresses](https://github.com/dsietz/scaffolding-core/issues/37)
 
 ## Usage
 
@@ -110,6 +105,7 @@ assert_eq!(entity.my_func(), "my function");
 ```
 ---
 There are additional Scaffolding features that can be applied.
+
 #### Addresses
 ```rust
 #[scaffolding_struct("addresses")]
@@ -127,7 +123,7 @@ let mut entity = MyEntity::new();
 
 /* use the addresses functionality */
 // (1) Add an address
-let addrShipping = entity.add_address(
+let id = entity.add_address(
     "shipping".to_string(),
     "acmes company".to_string(),
     "14 Main Street".to_string(),
@@ -138,7 +134,33 @@ let addrShipping = entity.add_address(
 // (2) Find addresses based on the category
 let shipping_addresses = entity.addresses_by_category("shipping".to_string());
 // (3) Remove an address
-entity.remove_address(addrBilling.id);
+entity.remove_address(id);
+```
+#### Email Addresses
+```rust
+#[scaffolding_struct("email_addresses")]
+#[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
+struct MyEntity {}
+
+impl MyEntity {
+    #[scaffolding_fn("email_addresses")]
+    fn new() -> Self {
+        Self {}
+    }
+}
+
+let mut entity = MyEntity::new();
+
+/* use the email addresses functionality */
+// (1) Add an email address
+let id = entity.insert_email_address(
+    "home".to_string(),
+    "myemail@example.com".to_string(),
+);
+// (2) Find email addresses based on the category
+let home_email_addresses = entity.search_email_addresses_by_category("home".to_string());
+// (3) Remove an address
+entity.remove_address(id);
 ```
 #### Metadata
 ```rust
@@ -178,26 +200,26 @@ impl MyEntity {
 let mut entity = MyEntity::new();
 
 // (1) Insert a note
-let note_id = entity.insert_note(
+let id = entity.insert_note(
   "fsmith".to_string(),
   "This was updated".as_bytes().to_vec(),
   None,
 );
 // (2) Modify the note
 entity.modify_note(
-  note_id.clone(),
+  id.clone(),
   "fsmith".to_string(),
   "This was updated again".as_bytes().to_vec(),
   Some("private".to_string()),
 );
 // (3) Read the note's content
-let read_note = entity.get_note(note_id.clone()).unwrap().content_as_string().unwrap();
+let read_note = entity.get_note(id.clone()).unwrap().content_as_string().unwrap();
 println!("{}", read_note);
 // (4) Search for notes that contain the word `updated`
 let search_results = entity.search_notes("updated".to_string());
 assert_eq!(search_results.len(), 1);
 // (5) Delete the note
-entity.remove_note(note_id);
+entity.remove_note(id);
 ```
 #### Phone Numbers
 ```rust
@@ -216,12 +238,12 @@ let mut entity = MyEntity::new();
 
 /* use the phone number functionality */
 // (1) Add a phone number
-let phoneHome = entity.add_phone_number(
+let _ = entity.add_phone_number(
     "home".to_string(),
     "8482493561".to_string(),
     "USA".to_string(),
 );
-let phoneWork = entity.add_phone_number(
+let id = entity.add_phone_number(
     "work".to_string(),
     "2223330000".to_string(),
     "USA".to_string(),
@@ -229,7 +251,7 @@ let phoneWork = entity.add_phone_number(
 // (2) Find phone number based on the category
 let home_phone = entity.phone_numbers_by_category("home".to_string());
 // (3) Remove an address
-entity.remove_phone_number(phoneWork.id);
+entity.remove_phone_number(id);
 ```
 #### Tagging
 ```rust
