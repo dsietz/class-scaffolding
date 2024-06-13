@@ -97,6 +97,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use errors::*;
+use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::Value;
@@ -615,6 +616,28 @@ impl EmailAddress {
         }
     }
 
+    /// This function performs a quick check to see if the email address is properly formatted.
+    /// NOTE: This is not a validation that the email address is real.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::EmailAddress;
+    /// use serde_derive::Deserialize;
+    ///
+    /// let email = EmailAddress::new(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    ///
+    /// assert_eq!(email.is_valid(), true);
+    /// ```
+    pub fn is_valid(&self) -> bool {
+        // use regex::Regex;
+        let exp = r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#;
+        let re = Regex::new(exp).unwrap();
+        re.is_match(&self.address)
+    }
     /// This function converts the EmailAddress to a serialize JSON string.
     ///
     /// #Example

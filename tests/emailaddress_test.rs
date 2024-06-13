@@ -32,6 +32,20 @@ mod tests {
     }
 
     #[test]
+    fn test_email_is_valid_true() {
+        let email = EmailAddress::new("home".to_string(), "myemail@example.com".to_string());
+
+        assert_eq!(email.is_valid(), true);
+    }
+
+    #[test]
+    fn test_email_is_valid_false() {
+        let email = EmailAddress::new("home".to_string(), "myemail@example".to_string());
+
+        assert_eq!(email.is_valid(), false);
+    }
+
+    #[test]
     fn test_entity_emailaddresses() {
         let mut entity = MyEntity::new();
 

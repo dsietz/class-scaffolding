@@ -30,6 +30,7 @@ person = []
 
 [dependencies]
 chrono = "0.4.35"
+regex = "1.10.5"
 scaffolding-macros = {path = "./scaffolding-macros", version = "0.7.0"}
 serde = "1.0.197"
 serde_derive = "1.0"
