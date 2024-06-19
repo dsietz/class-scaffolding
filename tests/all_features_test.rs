@@ -9,7 +9,14 @@ mod tests {
     use std::collections::BTreeMap;
     use std::fs;
 
-    #[scaffolding_struct("addresses", "email_addresses", "metadata", "notes", "phone_numbers", "tags")]
+    #[scaffolding_struct(
+        "addresses",
+        "email_addresses",
+        "metadata",
+        "notes",
+        "phone_numbers",
+        "tags"
+    )]
     #[derive(
         Clone,
         Debug,
@@ -28,7 +35,14 @@ mod tests {
     }
 
     impl MyEntity {
-        #[scaffolding_fn("addresses", "email_addresses", "metadata", "notes", "phone_numbers", "tags")]
+        #[scaffolding_fn(
+            "addresses",
+            "email_addresses",
+            "metadata",
+            "notes",
+            "phone_numbers",
+            "tags"
+        )]
         fn new(arg: bool) -> Self {
             Self {
                 b: arg,
@@ -187,19 +201,29 @@ mod tests {
 
     #[test]
     fn test_entity_all_serialization() {
-        let mut json = fs::read_to_string("./tests/entity.json").expect("Cannot read the entity.json file");
+        let mut json =
+            fs::read_to_string("./tests/entity.json").expect("Cannot read the entity.json file");
         json.retain(|c| !c.is_whitespace());
         let mut entity = MyEntity::deserialized::<MyEntity>(json.as_bytes()).unwrap();
 
-
         assert_eq!(entity.my_func(), "The answer is true".to_string());
         assert_eq!(entity.get_activity("updated".to_string()).len(), 2);
-        
+
         assert_eq!(entity.addresses.len(), 4);
-        assert_eq!(entity.search_addresses_by_category("shipping".to_string()).len(), 2);
+        assert_eq!(
+            entity
+                .search_addresses_by_category("shipping".to_string())
+                .len(),
+            2
+        );
 
         assert_eq!(entity.email_addresses.len(), 3);
-        assert_eq!(entity.search_email_addresses_by_category("home".to_string()).len(), 1);
+        assert_eq!(
+            entity
+                .search_email_addresses_by_category("home".to_string())
+                .len(),
+            1
+        );
 
         assert_eq!(entity.metadata.len(), 2);
 
@@ -207,7 +231,12 @@ mod tests {
         assert_eq!(entity.search_notes("thing".to_string()).len(), 2);
 
         assert_eq!(entity.phone_numbers.len(), 3);
-        assert_eq!(entity.search_phone_numbers_by_category("home".to_string()).len(), 1);
+        assert_eq!(
+            entity
+                .search_phone_numbers_by_category("home".to_string())
+                .len(),
+            1
+        );
 
         assert_eq!(entity.tags.len(), 3);
         assert!(entity.has_tag("tag_1".to_string()));
