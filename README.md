@@ -30,8 +30,8 @@ For software development teams who appreciate a kick-start to their object orien
 | ----------------------------------------------------------------------------- |
 | This crate is in an `beta` release phase and is only intended as experimental.|
 
-**0.7.0**
-+ [Provide the ability to manage email addresses](https://github.com/dsietz/scaffolding-core/issues/37)
+**0.8.0**
++ [Bug - trait Scaffolding is not object safe](https://github.com/dsietz/scaffolding-core/issues/33)
 
 ## Usage
 

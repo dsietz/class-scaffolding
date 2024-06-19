@@ -903,6 +903,7 @@ impl PhoneNumber {
 
 /// The core behavior of a Scaffolding object
 pub trait Scaffolding {
+    type Item;
     /// This function adds a ActivityItem to the activity log
     ///
     /// #Example
@@ -1012,8 +1013,8 @@ pub trait Scaffolding {
     /// assert_eq!(deserialized.activity.len(), 3);  
     ///
     /// ```
-    fn deserialized<T: DeserializeOwned>(serialized: &[u8]) -> Result<T, DeserializeError> {
-        match serde_json::from_slice::<T>(&serialized) {
+    fn deserialized<Item: DeserializeOwned>(serialized: &[u8]) -> Result<Item, DeserializeError> {
+        match serde_json::from_slice::<Item>(&serialized) {
             Ok(item) => Ok(item),
             Err(err) => {
                 println!("{}", err);
