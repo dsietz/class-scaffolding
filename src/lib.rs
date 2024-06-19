@@ -39,12 +39,10 @@
 //! use scaffolding_core::*;
 //! use scaffolding_macros::*;
 //! use serde_derive::{Deserialize, Serialize};
-//! // Required for scaffolding metadata functionality
-//! use std::collections::BTreeMap;
 //!
 //! // (1) Define the structure - Required
-//! #[scaffolding_struct("addresses","metadata","notes","tags")]
-//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses, ScaffoldingNotes, ScaffoldingTags)]
+//! #[scaffolding_struct]
+//! #[derive(Debug, Clone, Deserialize, Serialize, Scaffolding)]
 //! struct MyEntity {
 //!     a: bool,
 //!     b: String,
@@ -55,7 +53,7 @@
 //!     //     Note: Any of the Scaffodling attributes that are set here
 //!     //           will not be overwritten when generated. For example
 //!     //           the `id` attribute, if uncommented, would be ignored.
-//!     #[scaffolding_fn("addresses","metadata","notes","tags")]
+//!     #[scaffolding_fn]
 //!     fn new(arg: bool) -> Self {
 //!         let msg = format!("You said it is {}", arg);
 //!         Self {
@@ -87,72 +85,6 @@
 //! // (2) Get activities
 //! assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
 //!
-//! /* use the addresses functionality */
-//! // (1) Add an address
-//! let addrShippingId = entity.insert_address(
-//!     "shipping".to_string(),
-//!     "acmes company".to_string(),
-//!     "14 Main Street".to_string(),
-//!     "Big City, NY 038845".to_string(),
-//!     "USA".to_string(),
-//!     "USA".to_string(),
-//! );
-//! let addrBillingId = entity.insert_address(
-//!     "billing".to_string(),
-//!     "acmes company".to_string(),
-//!     "14 Main Street".to_string(),
-//!     "Big City, NY 038845".to_string(),
-//!     "USA".to_string(),
-//!     "USA".to_string(),
-//! );
-//! let addrHomeId = entity.insert_address(
-//!     "home".to_string(),
-//!     "Peter Petty".to_string(),
-//!     "23 Corner Lane".to_string(),
-//!     "Tiny Town, VT 044567".to_string(),
-//!     "USA".to_string(),
-//!     "USA".to_string(),
-//! );
-//! // (2) Find addresses based on the category
-//! let shipping_addresses = entity.search_addresses_by_category("shipping".to_string());
-//! // (3) Remove an address
-//! entity.remove_address(addrBillingId);
-//!
-//! /* use the notes functionality */
-//! // (1) Insert a note
-//! let note_id = entity.insert_note(
-//!   "fsmith".to_string(),
-//!   "This was updated".as_bytes().to_vec(),
-//!   None,
-//! );
-//! // (2) Modify the note
-//! entity.modify_note(
-//!   note_id.clone(),
-//!   "fsmith".to_string(),
-//!   "This was updated again".as_bytes().to_vec(),
-//!   Some("private".to_string()),
-//! );
-//! // (3) Read the note's content
-//! let read_note = entity.get_note(note_id.clone()).unwrap().content_as_string().unwrap();
-//! println!("{}", read_note);
-//! // (4) Search for notes that contain the word `updated`
-//! let search_results = entity.search_notes("updated".to_string());
-//! assert_eq!(search_results.len(), 1);
-//! // (5) Delete the note
-//! entity.remove_note(note_id);
-//!
-//! /* use the metadata functionality */
-//! entity.metadata.insert("field_1".to_string(), "myvalue".to_string());
-//! assert_eq!(entity.metadata.len(), 1);
-//!
-//! // manage tags
-//! entity.add_tag("tag_1".to_string());
-//! entity.add_tag("tag_2".to_string());
-//! entity.add_tag("tag_3".to_string());
-//! assert!(entity.has_tag("tag_1".to_string()));
-//! entity.remove_tag("tag_2".to_string());
-//! assert_eq!(entity.tags.len(), 2);
-//!
 //! // extended attributes
 //! assert_eq!(entity.a, true);
 //! assert_eq!(entity.b, "You said it is true");
@@ -165,6 +97,7 @@ extern crate serde_derive;
 extern crate serde_json;
 
 use errors::*;
+use regex::Regex;
 use serde::de::DeserializeOwned;
 use serde::Serialize;
 use serde_json::Value;
@@ -420,7 +353,6 @@ impl Address {
         self.modified_dtm = defaults::now();
     }
 }
-
 pub struct Countries {
     // The list of countries
     pub list: Vec<Country>,
@@ -608,6 +540,124 @@ impl Country {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct EmailAddress {
+    // The unique identifier of the note
+    pub id: String,
+    // The timestamp when the note was created
+    pub created_dtm: i64,
+    // The timestamp when the note was last modified
+    pub modified_dtm: i64,
+    // The type of email address, (e.g.: Login, Personal, Work, Primary Contact, Assistant, etc.)
+    pub category: String,
+    // The email address
+    pub address: String,
+}
+
+impl EmailAddress {
+    /// This is the constructor function.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::EmailAddress;
+    ///
+    /// fn main() {
+    ///   let email = EmailAddress::new(
+    ///       "home".to_string(),
+    ///       "myemail@example.com".to_string(),
+    ///   );
+    ///   
+    ///   // scaffolding attributes
+    ///   println!("{}", email.id);
+    ///   println!("{}", email.created_dtm);
+    ///   println!("{}", email.modified_dtm,);
+    /// }
+    /// ```
+    pub fn new(category: String, address: String) -> Self {
+        Self {
+            id: defaults::id(),
+            created_dtm: defaults::now(),
+            modified_dtm: defaults::now(),
+            category: category,
+            address: address,
+        }
+    }
+
+    /// This function instantiates a EmailAddress from a JSON string.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::EmailAddress;
+    /// use serde_derive::Deserialize;
+    ///
+    /// let serialized = r#"{
+    ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
+    ///   "created_dtm":1711833619,
+    ///   "modified_dtm":1711833619,
+    ///   "category":"home",
+    ///   "address":"myemail@example.com"
+    /// }"#;
+    /// let mut email = EmailAddress::deserialized(&serialized.as_bytes()).unwrap();
+    ///
+    /// assert_eq!(email.created_dtm, 1711833619);
+    /// assert_eq!(email.modified_dtm, 1711833619);
+    /// assert_eq!(email.category, "home".to_string());
+    /// ```
+    pub fn deserialized(serialized: &[u8]) -> Result<EmailAddress, DeserializeError> {
+        match serde_json::from_slice(&serialized) {
+            Ok(item) => Ok(item),
+            Err(err) => {
+                println!("{}", err);
+                Err(DeserializeError)
+            }
+        }
+    }
+
+    /// This function performs a quick check to see if the email address is properly formatted.
+    /// NOTE: This is not a validation that the email address is real.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::EmailAddress;
+    /// use serde_derive::Deserialize;
+    ///
+    /// let email = EmailAddress::new(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    ///
+    /// assert_eq!(email.is_valid(), true);
+    /// ```
+    pub fn is_valid(&self) -> bool {
+        // use regex::Regex;
+        let exp = r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#;
+        let re = Regex::new(exp).unwrap();
+        re.is_match(&self.address)
+    }
+    /// This function converts the EmailAddress to a serialize JSON string.
+    ///
+    /// #Example
+    ///
+    /// ```rust     
+    /// use scaffolding_core::{defaults, EmailAddress};
+    /// use serde_derive::{Serialize};
+    ///
+    /// let mut email = EmailAddress::new(
+    ///       "home".to_string(),
+    ///       "myemail@example.com".to_string(),
+    /// );
+    /// println!("{}", email.serialize());
+    /// ```
+    pub fn serialize(&mut self) -> String {
+        serde_json::to_string(&self).unwrap()
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Note {
     // The unique identifier of the note
     pub id: String,
@@ -757,7 +807,7 @@ pub struct PhoneNumber {
     pub created_dtm: i64,
     // The timestamp when the note was last modified
     pub modified_dtm: i64,
-    // The type of address, (e.g.: Billing, Shipping, Home, Work, etc.)
+    // The type of address, (e.g.: Login, Personal, Work, Primary Contact, Assistant, etc.)
     pub category: String,
     // The phone number
     pub number: String,
@@ -853,6 +903,7 @@ impl PhoneNumber {
 
 /// The core behavior of a Scaffolding object
 pub trait Scaffolding {
+    type Item;
     /// This function adds a ActivityItem to the activity log
     ///
     /// #Example
@@ -962,8 +1013,8 @@ pub trait Scaffolding {
     /// assert_eq!(deserialized.activity.len(), 3);  
     ///
     /// ```
-    fn deserialized<T: DeserializeOwned>(serialized: &[u8]) -> Result<T, DeserializeError> {
-        match serde_json::from_slice::<T>(&serialized) {
+    fn deserialized<Item: DeserializeOwned>(serialized: &[u8]) -> Result<Item, DeserializeError> {
+        match serde_json::from_slice::<Item>(&serialized) {
             Ok(item) => Ok(item),
             Err(err) => {
                 println!("{}", err);
@@ -1221,6 +1272,143 @@ pub trait ScaffoldingAddresses {
     /// assert_eq!(entity.addresses.len(), 0);
     /// ```
     fn remove_address(&mut self, id: String);
+}
+
+/// The email address behavior of a Scaffolding object
+pub trait ScaffoldingEmailAddresses {
+    /// Retrieves a related EmailAddress based on the specific id.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("email_addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("email_addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_email_address(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.get_email_address(id).unwrap().address, "myemail@example.com".to_string());
+    /// ```
+    fn get_email_address(&self, id: String) -> Option<&EmailAddress>;
+
+    /// Adds a related PhoneNumber to the Entity and returns the id for reference.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("email_addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("email_addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let _ = entity.insert_email_address(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.email_addresses.len(), 1);
+    /// ```
+    fn insert_email_address(&mut self, category: String, address: String) -> String;
+
+    /// Retrieves all the EmailAddress with the specified category.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("email_addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("email_addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let _ = entity.insert_email_address(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    ///
+    /// assert_eq!(entity.search_email_addresses_by_category("home".to_string()).len(), 1);
+    /// ```
+    fn search_email_addresses_by_category(&self, category: String) -> Vec<EmailAddress>;
+
+    /// Removes a related EmailAddress to the Entity.
+    ///
+    /// #Example
+    ///
+    /// ```rust
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
+    /// use scaffolding_macros::*;
+    /// use serde_derive::{Deserialize, Serialize};
+    /// use std::collections::BTreeMap;
+    ///
+    /// #[scaffolding_struct("email_addresses")]
+    /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
+    /// struct MyEntity {}
+    ///
+    /// impl MyEntity {
+    ///     #[scaffolding_fn("email_addresses")]
+    ///     fn new() -> Self {
+    ///         Self {}
+    ///     }
+    /// }
+    ///
+    /// let mut entity = MyEntity::new();
+    /// let id = entity.insert_email_address(
+    ///     "home".to_string(),
+    ///     "myemail@example.com".to_string(),
+    /// );
+    /// assert_eq!(entity.email_addresses.len(), 1);
+    ///
+    /// entity.remove_email_address(id);
+    /// assert_eq!(entity.email_addresses.len(), 0);
+    /// ```
+    fn remove_email_address(&mut self, id: String);
 }
 
 /// The notes behavior of a Scaffolding object
