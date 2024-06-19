@@ -1,0 +1,219 @@
+{
+    "b":true,
+    "n":253402261199,
+    "id": "b916ee23-b82f-43bb-b519-b110f1a86354",
+    "created_dtm": 1718817823,
+    "modified_dtm": 1718817823,
+    "inactive_dtm": 1726593823,
+    "expired_dtm": 1813425823,
+    "activity": [
+        {
+            "created_dtm": 1718817823,
+            "action": "updated",
+            "description": "The object has been updated"
+        },
+        {
+            "created_dtm": 1718817823,
+            "action": "updated",
+            "description": "The object has been updated"
+        },
+        {
+            "created_dtm": 1718817823,
+            "action": "cancelled",
+            "description": "The object has been cancelled"
+        }
+    ],
+    "addresses": {
+        "03d235fb-dd9c-446a-8e50-6d793a49b07e": {
+            "id": "03d235fb-dd9c-446a-8e50-6d793a49b07e",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "shipping",
+            "line_1": "neighbor house",
+            "line_2": "24 Corner Lane",
+            "line_3": "Tiny Town, VT 044567",
+            "line_4": "USA",
+            "country_code": "USA"
+        },
+        "2637f7b2-9065-4213-aa41-d4c64d5fdc41": {
+            "id": "2637f7b2-9065-4213-aa41-d4c64d5fdc41",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "billing",
+            "line_1": "acmes company",
+            "line_2": "14 Main Street",
+            "line_3": "Big City, NY 038845",
+            "line_4": "USA",
+            "country_code": "USA"
+        },
+        "6e1777ea-7539-4a74-8f0c-435b5e15f17d": {
+            "id": "6e1777ea-7539-4a74-8f0c-435b5e15f17d",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "shipping",
+            "line_1": "acmes company",
+            "line_2": "14 Main Street",
+            "line_3": "Big City, NY 038845",
+            "line_4": "USA",
+            "country_code": "USA"
+        },
+        "bcc33bdc-46c5-40e8-9c77-1502f4890e37": {
+            "id": "bcc33bdc-46c5-40e8-9c77-1502f4890e37",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "home",
+            "line_1": "Peter Petty",
+            "line_2": "23 Corner Lane",
+            "line_3": "Tiny Town, VT 044567",
+            "line_4": "USA",
+            "country_code": "USA"
+        }
+    },
+    "email_addresses": {
+        "25e07f00-de66-421a-b465-4211c2f327cf": {
+            "id": "25e07f00-de66-421a-b465-4211c2f327cf",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "other",
+            "address": "myemail@example.com"
+        },
+        "c31f5501-ca34-46ec-b84b-2ec07eb7afa5": {
+            "id": "c31f5501-ca34-46ec-b84b-2ec07eb7afa5",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "work",
+            "address": "myemail@example.com"
+        },
+        "dd13725b-0166-49b0-ba4e-7f9f8d1e049a": {
+            "id": "dd13725b-0166-49b0-ba4e-7f9f8d1e049a",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "home",
+            "address": "myemail@example.com"
+        }
+    },
+    "metadata": {
+        "field_1": "myvalue1",
+        "field_2": "myvalue2"
+    },
+    "notes": {
+        "0c5513f8-e92f-4b8d-b924-db62d4958318": {
+            "id": "0c5513f8-e92f-4b8d-b924-db62d4958318",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "author": "fsmith",
+            "access": "private",
+            "content": [
+                78,
+                111,
+                110,
+                101,
+                116,
+                104,
+                105,
+                110,
+                103,
+                32,
+                116,
+                111,
+                32,
+                102,
+                105,
+                110,
+                100,
+                32,
+                104,
+                101,
+                114,
+                101
+            ]
+        },
+        "4c1f06a4-55b8-4440-b998-d5a3a67e280c": {
+            "id": "4c1f06a4-55b8-4440-b998-d5a3a67e280c",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "author": "fsmith",
+            "access": "public",
+            "content": [
+                83,
+                111,
+                109,
+                101,
+                116,
+                104,
+                105,
+                110,
+                103,
+                32,
+                116,
+                111,
+                32,
+                102,
+                105,
+                110,
+                100,
+                32,
+                104,
+                101,
+                114,
+                101
+            ]
+        },
+        "95c6590e-6831-4c12-98b4-dccdc9c93d29": {
+            "id": "95c6590e-6831-4c12-98b4-dccdc9c93d29",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "author": "fsmith",
+            "access": "public",
+            "content": [
+                84,
+                104,
+                105,
+                115,
+                32,
+                119,
+                97,
+                115,
+                32,
+                117,
+                112,
+                100,
+                97,
+                116,
+                101,
+                100
+            ]
+        }
+    },
+    "phone_numbers": {
+        "518e0225-51cf-430a-b039-e419e8454f6d": {
+            "id": "518e0225-51cf-430a-b039-e419e8454f6d",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "work",
+            "number": "2223330000",
+            "country_code": "USA"
+        },
+        "76ba240e-cce5-493f-8547-00055bd52b2f": {
+            "id": "76ba240e-cce5-493f-8547-00055bd52b2f",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "home",
+            "number": "8482493561",
+            "country_code": "USA"
+        },
+        "cd245dbb-56db-42e0-bef1-785bbad20a54": {
+            "id": "cd245dbb-56db-42e0-bef1-785bbad20a54",
+            "created_dtm": 1718817823,
+            "modified_dtm": 1718817823,
+            "category": "other",
+            "number": "7776664444",
+            "country_code": "USA"
+        }
+    },
+    "tags": [
+        "tag_1",
+        "tag_2",
+        "tag_3"
+    ]
+}

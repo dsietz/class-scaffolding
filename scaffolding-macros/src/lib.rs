@@ -7,6 +7,7 @@ use syn::Member;
 use syn::{parse_macro_input, parse_quote, punctuated::Punctuated, ItemStruct, LitStr, Token};
 
 static ADDRESS: &str = "addresses";
+static EMAIL: &str = "email_addresses";
 static METADATA: &str = "metadata";
 static PHONE: &str = "phone_numbers";
 static NOTES: &str = "notes";
@@ -92,6 +93,18 @@ pub fn scaffolding_struct(args: TokenStream, input: TokenStream) -> TokenStream 
                 fields.named.push(
                     syn::Field::parse_named
                         .parse2(quote! { pub addresses: BTreeMap<String, Address> })
+                        .unwrap(),
+                );
+            }
+            false => {}
+        }
+
+        match attrs.contains(&EMAIL.to_string()) {
+            true => {
+                // The phonenumber handler
+                fields.named.push(
+                    syn::Field::parse_named
+                        .parse2(quote! { pub email_addresses: BTreeMap<String, EmailAddress> })
                         .unwrap(),
                 );
             }
@@ -187,6 +200,7 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl Scaffolding for #name {
+            type Item = #name;
             fn get_activity(&self, name: String) -> Vec<ActivityItem>{
                 self.activity.iter().filter(|a| a.action == name).cloned().collect()
             }
@@ -248,6 +262,49 @@ fn impl_scaffolding_addresses(ast: &syn::DeriveInput) -> TokenStream {
 
             fn remove_address(&mut self, id: String) {
                 self.addresses.remove(&id);
+            }
+        }
+    };
+    gen.into()
+}
+
+// EmailAddresses Trait
+#[proc_macro_derive(ScaffoldingEmailAddresses)]
+pub fn scaffolding_emailaddresses_derive(input: TokenStream) -> TokenStream {
+    let ast: syn::DeriveInput = syn::parse(input).unwrap();
+
+    impl_scaffolding_emailaddresses(&ast)
+}
+
+fn impl_scaffolding_emailaddresses(ast: &syn::DeriveInput) -> TokenStream {
+    let name = &ast.ident;
+    let gen = quote! {
+        impl ScaffoldingEmailAddresses for #name {
+            fn get_email_address(&self, id: String) -> Option<&EmailAddress> {
+                self.email_addresses.get(&id)
+            }
+
+            fn insert_email_address(
+                &mut self,
+                category: String,
+                address: String,
+            ) -> String {
+                let email = EmailAddress::new(category, address);
+                let id = email.id.clone();
+                self.email_addresses.insert(id.clone(), email);
+                id
+            }
+
+            fn search_email_addresses_by_category(&self, category: String) -> Vec<EmailAddress> {
+                self.email_addresses
+                    .iter()
+                    .filter(|(k,v)| v.category == category)
+                    .map(|(k,v)| v.clone())
+                    .collect()
+            }
+
+            fn remove_email_address(&mut self, id: String) {
+                self.email_addresses.remove(&id);
             }
         }
     };
@@ -440,6 +497,13 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                 _ => {}
                             }
 
+                            match attrs.contains(&EMAIL.to_string()) {
+                                true => {
+                                    modify_attr_list.push(&EMAIL);
+                                }
+                                _ => {}
+                            }
+
                             match attrs.contains(&METADATA.to_string()) {
                                 true => {
                                     modify_attr_list.push(&METADATA);
@@ -533,6 +597,11 @@ pub fn scaffolding_fn(args: TokenStream, input: TokenStream) -> TokenStream {
                                     "addresses" => {
                                         let line: FieldValue =
                                             parse_quote! {addresses: BTreeMap::new()};
+                                        expr_struct.fields.insert(0, line);
+                                    }
+                                    "email_addresses" => {
+                                        let line: FieldValue =
+                                            parse_quote! {email_addresses: BTreeMap::new()};
                                         expr_struct.fields.insert(0, line);
                                     }
                                     "phone_numbers" => {
