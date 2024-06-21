@@ -26,11 +26,11 @@ For software development teams who appreciate a kick-start to their object orien
 ---
 
 ## What's New
-| :warning: Please Note!                                                                  |
-| ----------------------------------------------------------------------------- |
-| This crate is in an `beta` release phase and is only intended as experimental.|
+| :star: General Release                                                         |
+| ------------------------------------------------------------------------------ |
+| This crate is in `general release` and is treated as the initial release.      |
 
-**0.8.0**
+**1.0.0**
 + [Bug - trait Scaffolding is not object safe](https://github.com/dsietz/scaffolding-core/issues/33)
 
 ## Usage
@@ -102,6 +102,41 @@ assert_eq!(entity.b, "You said it is true");
 
 /* custom behavior */
 assert_eq!(entity.my_func(), "my function");
+```
+__Serializing__
+```rust
+let json_string = entity.serialize();
+println!("{}", json_string);
+```
+__Deserializing__
+```rust
+let json = r#"{
+    "id":"b4d6c6db-7468-400a-8536-a5e83b1f2bdc",
+    "created_dtm":1711802687,
+    "modified_dtm":1711802687,
+    "inactive_dtm":1719578687,
+    "expired_dtm":1806410687,
+    "activity":[
+        {
+            "created_dtm":1711802687,
+            "action":"updated",
+            "description":"The object has been updated"
+        },
+        {
+            "created_dtm":1711802687,
+            "action":"updated",
+            "description":"The object has been updated"
+        },
+        {
+            "created_dtm":1711802687,
+            "action":"cancelled",
+            "description":"The object has been cancelled"
+        }
+        ]
+    }"#;
+let entity = MyEntity::deserialized(json.as_bytes()).unwrap();
+
+assert_eq!(entity.get_activity("cancelled".to_string()).len(), 1);
 ```
 ---
 There are additional Scaffolding features that can be applied.

@@ -14,5 +14,5 @@
 | ----------------------------------------------------------------------------- |
 | This crate is published as a dependency for the [scaffolding-core](https://crates.io/crates/scaffolding-core) crate. |
 
-**0.5.0**
-+ [Provide the ability to manage entities](https://github.com/dsietz/scaffolding-core/issues/32)
+**1.0.0**
++ [Bug - trait Scaffolding is not object safe](https://github.com/dsietz/scaffolding-core/issues/33)

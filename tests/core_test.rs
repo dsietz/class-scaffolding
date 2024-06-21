@@ -103,7 +103,7 @@ mod tests {
                 }
                 ]
             }"#;
-        let deserialized = MyEntity::deserialized::<MyEntity>(json.as_bytes()).unwrap();
+        let deserialized = MyEntity::deserialized(json.as_bytes()).unwrap();
         assert_eq!(deserialized.id, "b4d6c6db-7468-400a-8536-a5e83b1f2bdc");
         assert_eq!(deserialized.activity.len(), 3);
         assert_eq!(deserialized.b, true);
