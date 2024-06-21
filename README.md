@@ -30,7 +30,7 @@ For software development teams who appreciate a kick-start to their object orien
 | ------------------------------------------------------------------------------ |
 | This crate is in `general release` and is treated as the initial release.      |
 
-**1.0.0**
+**0.9.0**
 + [Bug - trait Scaffolding is not object safe](https://github.com/dsietz/scaffolding-core/issues/33)
 
 ## Usage
