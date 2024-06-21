@@ -200,7 +200,6 @@ fn impl_scaffolding(ast: &syn::DeriveInput) -> TokenStream {
     let name = &ast.ident;
     let gen = quote! {
         impl Scaffolding for #name {
-            type Item = #name;
             fn get_activity(&self, name: String) -> Vec<ActivityItem>{
                 self.activity.iter().filter(|a| a.action == name).cloned().collect()
             }
