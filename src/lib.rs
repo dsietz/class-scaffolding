@@ -79,6 +79,10 @@
 //! // expires in 3 years
 //! assert_eq!(entity.expired_dtm, defaults::add_years(defaults::now(), 3));
 //!
+//! /* serialization */
+//! let json_string = entity.serialize();
+//! println!("{}", json_string);
+//!
 //! /* use the activity log functionality  */
 //! // (1) Log an activity
 //! entity.log_activity("cancelled".to_string(), "The customer has cancelled their service".to_string());
@@ -903,7 +907,6 @@ impl PhoneNumber {
 
 /// The core behavior of a Scaffolding object
 pub trait Scaffolding {
-    type Item;
     /// This function adds a ActivityItem to the activity log
     ///
     /// #Example
@@ -1007,14 +1010,17 @@ pub trait Scaffolding {
     ///         }
     ///         ]
     ///     }"#;
-    /// let deserialized = MyEntity::deserialized::<MyEntity>(json.as_bytes()).unwrap();
+    /// let deserialized = MyEntity::deserialized(json.as_bytes()).unwrap();
     ///
     /// assert_eq!(deserialized.id, "b4d6c6db-7468-400a-8536-a5e83b1f2bdc");
     /// assert_eq!(deserialized.activity.len(), 3);  
     ///
     /// ```
-    fn deserialized<Item: DeserializeOwned>(serialized: &[u8]) -> Result<Item, DeserializeError> {
-        match serde_json::from_slice::<Item>(&serialized) {
+    fn deserialized(serialized: &[u8]) -> Result<Self, DeserializeError>
+    where
+        Self: DeserializeOwned,
+    {
+        match serde_json::from_slice::<Self>(&serialized) {
             Ok(item) => Ok(item),
             Err(err) => {
                 println!("{}", err);

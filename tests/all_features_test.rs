@@ -204,7 +204,7 @@ mod tests {
         let mut json =
             fs::read_to_string("./tests/entity.json").expect("Cannot read the entity.json file");
         json.retain(|c| !c.is_whitespace());
-        let mut entity = MyEntity::deserialized::<MyEntity>(json.as_bytes()).unwrap();
+        let mut entity = MyEntity::deserialized(json.as_bytes()).unwrap();
 
         assert_eq!(entity.my_func(), "The answer is true".to_string());
         assert_eq!(entity.get_activity("updated".to_string()).len(), 2);
