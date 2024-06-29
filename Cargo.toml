@@ -1,6 +1,6 @@
 [package]
 name = "scaffolding-core"
-version = "1.0.0"
+version = "1.0.1"
 authors = ["dsietz <davidsietz@yahoo.com>"]
 categories = ["data-structures","development-tools","rust-patterns"]
 description = "A software development kit that provides the scaffolding for building applications and services using OOP."
@@ -18,7 +18,7 @@ readme = "README.md"
 repository = "https://github.com/dsietz/scaffolding-core"
 
 [badges]
-maintenance = {status = "experimental"}
+maintenance = {status = "actively-developed"}
 
 [lib]
 name = "scaffolding_core"
