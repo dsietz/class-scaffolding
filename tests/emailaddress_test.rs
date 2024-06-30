@@ -1,13 +1,9 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
     use scaffolding_core::*;
-    use scaffolding_macros::*;
-    use serde_derive::{Deserialize, Serialize};
-    use std::collections::BTreeMap;
 
     #[scaffolding_struct("email_addresses")]
     #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]

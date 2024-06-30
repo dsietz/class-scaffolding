@@ -1,12 +1,8 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
     use scaffolding_core::*;
-    use scaffolding_macros::*;
-    use serde_derive::{Deserialize, Serialize};
-    use std::collections::BTreeMap;
     use std::fs;
 
     #[scaffolding_struct(
