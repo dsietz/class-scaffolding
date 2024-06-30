@@ -1,11 +1,8 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
-    use scaffolding_macros::*;
-    use serde_derive::{Deserialize, Serialize};
+    use scaffolding_core::*;
 
     #[scaffolding_struct("tags")]
     #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingTags)]

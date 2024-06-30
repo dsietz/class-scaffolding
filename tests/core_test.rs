@@ -1,12 +1,9 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
     use chrono::Utc;
-    use scaffolding_core::{defaults, ActivityItem, Scaffolding};
-    use scaffolding_macros::*;
-    use serde_derive::{Deserialize, Serialize};
+    use scaffolding_core::*;
 
     #[scaffolding_struct]
     #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding)]

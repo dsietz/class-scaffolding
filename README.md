@@ -26,12 +26,11 @@ For software development teams who appreciate a kick-start to their object orien
 ---
 
 ## What's New
-| :star: General Release                                                         |
-| ------------------------------------------------------------------------------ |
-| This crate is in `general release` and is treated as the initial release.      |
+We made the crate easier to implement and updated the documentation and the crate metadata.
 
-**1.0.0**
-+ [Bug - trait Scaffolding is not object safe](https://github.com/dsietz/scaffolding-core/issues/33)
+**2.0.0**
++ [re-export dependent crates for ease of easier usability](https://github.com/dsietz/scaffolding-core/issues/45)
++ [Clean up](https://github.com/dsietz/scaffolding-core/issues/46)
 
 ## Usage
 
@@ -40,10 +39,6 @@ For software development teams who appreciate a kick-start to their object orien
 extern crate scaffolding_core;
 
 use scaffolding_core::*;
-use scaffolding_macros::*;
-use serde_derive::{Deserialize, Serialize};
-// Required for scaffolding extended functionality (e.g.: addresses, metadata, notes, phonenumbers)
-use std::collections::BTreeMap;
 ```
 (2) Add Scaffolding attributes and apply the trait to a `struct` 
 ```rust
