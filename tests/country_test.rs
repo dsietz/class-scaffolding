@@ -1,5 +1,4 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {

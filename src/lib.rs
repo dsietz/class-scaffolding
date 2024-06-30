@@ -37,8 +37,6 @@
 //! extern crate scaffolding_core;
 //!
 //! use scaffolding_core::*;
-//! use scaffolding_macros::*;
-//! use serde_derive::{Deserialize, Serialize};
 //!
 //! // (1) Define the structure - Required
 //! #[scaffolding_struct]
@@ -102,8 +100,12 @@ extern crate serde_json;
 
 use errors::*;
 use regex::Regex;
+pub use scaffolding_macros::*;
 use serde::de::DeserializeOwned;
-use serde::Serialize;
+use serde::ser::Serialize;
+pub use serde_derive::{Deserialize, Serialize};
+pub use std::collections::BTreeMap;
+
 use serde_json::Value;
 
 /// Supporting Classes
@@ -123,9 +125,9 @@ impl ActivityItem {
     /// #Example
     ///
     /// ```rust
-    /// // extern crate scaffolding_core;
+    /// extern crate scaffolding_core;
     ///     
-    /// use scaffolding_core::{defaults, ActivityItem};
+    /// use scaffolding_core::*;
     ///
     /// let mut activity_item = ActivityItem::new("updated".to_string(), "This was updated".to_string());
     /// ```
@@ -142,8 +144,9 @@ impl ActivityItem {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::ActivityItem;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "created_dtm":1711760135,
@@ -171,9 +174,9 @@ impl ActivityItem {
     /// #Example
     ///
     /// ```rust
-    /// use scaffolding_core::ActivityItem;
-    /// use serde_derive::Serialize;
-    ///
+    /// extern crate scaffolding_core;
+    ///     
+    /// use scaffolding_core::*;
     ///
     /// let mut activity_item = ActivityItem::new("updated".to_string(), "This was updated".to_string());
     /// let json = activity_item.serialize();
@@ -215,7 +218,7 @@ impl Address {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::Address;
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///   let address = Address::new(
@@ -260,8 +263,7 @@ impl Address {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::Address;
-    /// use serde_derive::Deserialize;
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
@@ -295,8 +297,7 @@ impl Address {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::{defaults, Address};
-    /// use serde_derive::{Serialize};
+    /// use scaffolding_core::*;
     ///
     /// let mut address = Address::new(
     ///   "shipping".to_string(),
@@ -317,8 +318,7 @@ impl Address {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::{defaults, Address};
-    /// use serde_derive::{Serialize};
+    /// use scaffolding_core::*;
     ///
     /// let mut address = Address::new(
     ///   "shipping".to_string(),
@@ -370,7 +370,7 @@ impl Countries {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::Countries;
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///   let countries = Countries::new();
@@ -401,7 +401,7 @@ impl Countries {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::{Countries, Country};
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///  let countries = Countries::new();
@@ -434,7 +434,7 @@ impl Countries {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::{Countries, Country};
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///  let countries = Countries::new();
@@ -458,7 +458,7 @@ impl Countries {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::{Countries, Country};
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///  let countries = Countries::new();
@@ -482,7 +482,7 @@ impl Countries {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::{Countries, Country};
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///  let countries = Countries::new();
@@ -565,7 +565,7 @@ impl EmailAddress {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::EmailAddress;
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///   let email = EmailAddress::new(
@@ -594,8 +594,9 @@ impl EmailAddress {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::EmailAddress;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
@@ -626,8 +627,9 @@ impl EmailAddress {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::EmailAddress;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let email = EmailAddress::new(
     ///     "home".to_string(),
@@ -636,6 +638,7 @@ impl EmailAddress {
     ///
     /// assert_eq!(email.is_valid(), true);
     /// ```
+
     pub fn is_valid(&self) -> bool {
         // use regex::Regex;
         let exp = r#"(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|"(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21\x23-\x5b\x5d-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])*")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\x01-\x08\x0b\x0c\x0e-\x1f\x21-\x5a\x53-\x7f]|\\[\x01-\x09\x0b\x0c\x0e-\x7f])+)\])"#;
@@ -647,8 +650,9 @@ impl EmailAddress {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::{defaults, EmailAddress};
-    /// use serde_derive::{Serialize};
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let mut email = EmailAddress::new(
     ///       "home".to_string(),
@@ -682,8 +686,10 @@ impl Note {
     ///
     /// #Example
     ///
-    /// ```rust     
-    /// use scaffolding_core::{defaults, Note};
+    /// ```rust    
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let note = Note::new("fsmith".to_string(), "This was updated".as_bytes().to_vec(), None);
     /// ```
@@ -706,6 +712,8 @@ impl Note {
     /// #Example
     ///
     /// ```rust     
+    /// extern crate scaffolding_core;
+    ///
     /// use scaffolding_core::{defaults, Note};
     ///
     /// let note = Note::new("fsmith".to_string(), "This was updated".as_bytes().to_vec(), None);
@@ -721,8 +729,9 @@ impl Note {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::Note;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
@@ -755,8 +764,9 @@ impl Note {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::{defaults, Note};
-    /// use serde_derive::{Serialize};
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let mut note = Note::new("fsmith".to_string(), "This was updated".as_bytes().to_vec(), None);
     /// println!("{}", note.serialize());
@@ -771,8 +781,9 @@ impl Note {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::{defaults, Note};
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
@@ -827,7 +838,7 @@ impl PhoneNumber {
     /// ```rust
     /// extern crate scaffolding_core;
     ///
-    /// use scaffolding_core::PhoneNumber;
+    /// use scaffolding_core::*;
     ///
     /// fn main() {
     ///   let phone = PhoneNumber::new(
@@ -858,8 +869,9 @@ impl PhoneNumber {
     /// #Example
     ///
     /// ```rust     
-    /// use scaffolding_core::PhoneNumber;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let serialized = r#"{
     ///   "id":"2d624160-16b1-49ce-9b90-09a82127d6ac",
@@ -889,9 +901,10 @@ impl PhoneNumber {
     ///
     /// #Example
     ///
-    /// ```rust     
-    /// use scaffolding_core::{defaults, PhoneNumber};
-    /// use serde_derive::{Serialize};
+    /// ```rust    
+    /// extern crate scaffolding_core;
+    ///
+    /// use scaffolding_core::*;
     ///
     /// let mut phone = PhoneNumber::new(
     ///       "home".to_string(),
@@ -912,10 +925,9 @@ pub trait Scaffolding {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
-    /// use scaffolding_macros::*;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct]
     /// #[derive(Clone, Debug, Scaffolding)]
@@ -940,10 +952,9 @@ pub trait Scaffolding {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
-    /// use scaffolding_macros::*;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct]
     /// #[derive(Clone, Debug, Scaffolding)]
@@ -969,11 +980,9 @@ pub trait Scaffolding {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
-    /// use scaffolding_macros::*;
-    /// use serde_derive::Deserialize;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct]
     /// #[derive(Clone, Debug, Deserialize, Scaffolding)]
@@ -1034,11 +1043,9 @@ pub trait Scaffolding {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding};
-    /// use scaffolding_macros::*;
-    /// use serde_derive::Serialize;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct]
     /// #[derive(Clone, Debug, Serialize, Scaffolding)]
@@ -1072,11 +1079,8 @@ pub trait ScaffoldingAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -1109,11 +1113,8 @@ pub trait ScaffoldingAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -1154,11 +1155,8 @@ pub trait ScaffoldingAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -1209,11 +1207,8 @@ pub trait ScaffoldingAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -1246,11 +1241,8 @@ pub trait ScaffoldingAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingAddresses)]
@@ -1288,11 +1280,8 @@ pub trait ScaffoldingEmailAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("email_addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
@@ -1321,11 +1310,8 @@ pub trait ScaffoldingEmailAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("email_addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
@@ -1354,11 +1340,8 @@ pub trait ScaffoldingEmailAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("email_addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
@@ -1387,11 +1370,8 @@ pub trait ScaffoldingEmailAddresses {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("email_addresses")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingEmailAddresses)]
@@ -1425,11 +1405,8 @@ pub trait ScaffoldingNotes {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("notes")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
@@ -1459,11 +1436,8 @@ pub trait ScaffoldingNotes {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("notes")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
@@ -1493,11 +1467,8 @@ pub trait ScaffoldingNotes {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("notes")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
@@ -1532,11 +1503,8 @@ pub trait ScaffoldingNotes {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("notes")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
@@ -1579,11 +1547,8 @@ pub trait ScaffoldingNotes {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("notes")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
@@ -1629,11 +1594,8 @@ pub trait ScaffoldingPhoneNumbers {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("phone_numbers")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
@@ -1663,11 +1625,8 @@ pub trait ScaffoldingPhoneNumbers {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("phone_numbers")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
@@ -1702,11 +1661,8 @@ pub trait ScaffoldingPhoneNumbers {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("phone_numbers")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
@@ -1736,11 +1692,8 @@ pub trait ScaffoldingPhoneNumbers {
     ///
     /// ```rust
     /// extern crate scaffolding_core;
-    ///     
+    ///  
     /// use scaffolding_core::*;
-    /// use scaffolding_macros::*;
-    /// use serde_derive::{Deserialize, Serialize};
-    /// use std::collections::BTreeMap;
     ///
     /// #[scaffolding_struct("phone_numbers")]
     /// #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingPhoneNumbers)]
@@ -1774,10 +1727,9 @@ pub trait ScaffoldingTags {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
-    /// use scaffolding_macros::*;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct("tags")]
     /// #[derive(Clone, Debug, Scaffolding, ScaffoldingTags)]
@@ -1807,10 +1759,9 @@ pub trait ScaffoldingTags {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
-    /// use scaffolding_macros::*;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct("tags")]
     /// #[derive(Clone, Debug, Scaffolding, ScaffoldingTags)]
@@ -1836,10 +1787,9 @@ pub trait ScaffoldingTags {
     /// #Example
     ///
     /// ```rust
-    /// #[macro_use]
-    ///     
-    /// use scaffolding_core::{defaults, ActivityItem, Scaffolding, ScaffoldingTags};
-    /// use scaffolding_macros::*;
+    /// extern crate scaffolding_core;
+    ///  
+    /// use scaffolding_core::*;
     ///
     /// #[scaffolding_struct("tags")]
     /// #[derive(Clone, Debug, Scaffolding, ScaffoldingTags)]

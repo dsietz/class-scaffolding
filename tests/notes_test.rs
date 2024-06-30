@@ -1,12 +1,8 @@
 extern crate scaffolding_core;
-extern crate scaffolding_macros;
 
 #[cfg(test)]
 mod tests {
-    use scaffolding_core::{defaults, ActivityItem, Note, Scaffolding, ScaffoldingNotes};
-    use scaffolding_macros::*;
-    use serde_derive::{Deserialize, Serialize};
-    use std::collections::BTreeMap;
+    use scaffolding_core::*;
 
     #[scaffolding_struct("notes")]
     #[derive(Clone, Debug, Deserialize, Serialize, Scaffolding, ScaffoldingNotes)]
